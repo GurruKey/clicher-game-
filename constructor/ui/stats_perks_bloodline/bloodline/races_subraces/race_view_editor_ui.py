@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ...theme import create_scrollbar
+from ....theme import create_scrollbar
 
 
 def build_editor_ui(view) -> None:

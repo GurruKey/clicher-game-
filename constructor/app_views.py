@@ -7,10 +7,7 @@ from game_io.rarities import load_rarity_colors, parse_rarities
 from game_io.stats import parse_stats
 from ui.avatars.editor import create_avatar_editor_view
 from ui.avatars.info import create_avatars_view
-from ui.stats_perks_bloodline.bloodline import (
-    create_bloodline_info_view,
-    create_bloodline_race_view
-)
+from ui.stats_perks_bloodline.bloodline import create_bloodline_race_view
 from ui.stats_perks_bloodline.perks import create_perks_info_view
 from ui.stats_perks_bloodline.stats import create_stats_info_view
 from ui.ui_help import create_help_view
@@ -129,7 +126,7 @@ class ViewBuilders:
 
     def build_bloodline_info_view(self, frame) -> None:
         avatars = self.get_avatars()
-        create_bloodline_info_view(frame, avatars)
+        create_avatars_view(frame, avatars)
 
     def build_bloodline_race_view(self, frame) -> None:
         create_bloodline_race_view(

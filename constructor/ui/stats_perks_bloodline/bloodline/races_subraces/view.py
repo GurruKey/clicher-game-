@@ -2,7 +2,8 @@ from .race_view_base import RaceViewBase
 from .race_view_lists import RaceViewListMixin
 from .race_view_data import RaceViewDataMixin
 from .race_view_actions_core import RaceViewActionCoreMixin
-from .race_view_actions_level import RaceViewLevelEditorMixin
+from .race_view_level_editor import RaceViewLevelEditorMixin
+from .race_view_level_actions import RaceViewLevelActionsMixin
 from .race_view_actions_race import RaceViewRaceActionMixin
 from .race_view_actions_tag import RaceViewTagActionMixin
 from .race_view_select import RaceViewSelectMixin
@@ -14,6 +15,7 @@ class RaceView(
     RaceViewDataMixin,
     RaceViewActionCoreMixin,
     RaceViewLevelEditorMixin,
+    RaceViewLevelActionsMixin, 
     RaceViewRaceActionMixin,
     RaceViewTagActionMixin,
     RaceViewSelectMixin

@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ...theme import create_scrollbar
+from ....theme import create_scrollbar
 
 from .race_view_editor_ui import build_editor_ui
 from .race_view_level_editor_ui import build_level_editor_ui

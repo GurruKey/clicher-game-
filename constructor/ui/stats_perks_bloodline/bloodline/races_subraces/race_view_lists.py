@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ...theme import (
+from ....theme import (
     ROW_BG,
     ROW_BORDER,
     ROW_HOVER_BG,

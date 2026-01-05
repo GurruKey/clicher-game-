@@ -1,4 +1,4 @@
-from ...theme import BUTTON_BG, MODE_ACTIVE_BG, MODE_ACTIVE_FG, TEXT_COLOR
+from ....theme import BUTTON_BG, MODE_ACTIVE_BG, MODE_ACTIVE_FG, TEXT_COLOR
 
 
 class RaceViewActionCoreMixin:
