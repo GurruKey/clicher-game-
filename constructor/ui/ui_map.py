@@ -9,7 +9,9 @@ from .theme import (
     ROW_HOVER_BG,
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
-    create_scrollbar
+    ScrollableFrame,
+    ModernPanedWindow,
+    ModernButton
 )
 from .ui_common import draw_rounded_rect
 
@@ -23,24 +25,21 @@ def create_map_view(
 ) -> None:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0)
-    container.columnconfigure(1, weight=0)
-    container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
-    list_frame = tk.Frame(container)
-    list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    # UPDATED: Use ModernPanedWindow
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    list_frame = tk.Frame(paned)
+    paned.add(list_frame, minsize=240)
 
-    map_frame = tk.Frame(container)
-    map_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    map_frame = tk.Frame(paned)
+    paned.add(map_frame, minsize=600)
 
     controls_frame = tk.Frame(map_frame)
     controls_frame.pack(fill="x", pady=(0, 8))
 
-    recenter_button = tk.Button(
+    recenter_button = ModernButton(
         controls_frame,
         text="◎",
         width=3,
@@ -222,7 +221,7 @@ def create_map_view(
     info_footer = tk.Frame(info_frame, bg="#0f0c09")
     info_footer.pack(fill="x", padx=12, pady=(0, 12))
 
-    info_close = tk.Button(info_footer, text="Close", command=lambda: hide_info())
+    info_close = ModernButton(info_footer, text="Close", command=lambda: hide_info())
     info_close.pack(side="right")
 
     info_images: list[tk.PhotoImage] = []
@@ -326,19 +325,10 @@ def create_map_view(
         zoom["value"] = 1.0
         redraw()
 
-    canvas = tk.Canvas(list_frame, width=240, highlightthickness=0)
-    scrollbar = create_scrollbar(list_frame, orient="vertical", command=canvas.yview)
-    inner = tk.Frame(canvas)
-
-    def on_list_configure(_event) -> None:
-        canvas.configure(scrollregion=canvas.bbox("all"))
-
-    inner.bind("<Configure>", on_list_configure)
-    canvas.create_window((0, 0), window=inner, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    canvas.pack(side="left", fill="y", expand=False)
-    scrollbar.pack(side="right", fill="y")
+    # Location List using ScrollableFrame
+    scroll_view = ScrollableFrame(list_frame, auto_hide=True, min_width=240)
+    scroll_view.pack(side="left", fill="both", expand=True)
+    inner = scroll_view.inner_frame
 
     row_entries: list[dict] = []
     selected_location_id: str | None = location["id"] if location else None

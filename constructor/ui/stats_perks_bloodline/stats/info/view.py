@@ -14,7 +14,9 @@ from ....theme import (
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
     BUTTON_BG,
-    TEXT_COLOR
+    TEXT_COLOR,
+    ModernPanedWindow,
+    ModernButton
 )
 
 def create_stats_info_view(
@@ -33,7 +35,7 @@ def create_stats_info_view(
     stats_source = stat_targets if stat_targets is not None else stats
     res_source = resource_targets if resource_targets is not None else []
     
-    selected_stat_id = [None]  # Use list for mutable closure
+    selected_stat_id = [None]
     hovered_stat_id = [None]
     is_editing = [False]
     current_modifiers = []
@@ -43,17 +45,16 @@ def create_stats_info_view(
     # --- Main Layout ---
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0); container.columnconfigure(1, weight=0); container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
-    left_frame = tk.Frame(container)
-    left_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    # UPDATED: Use ModernPanedWindow
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    left_frame = tk.Frame(paned)
+    paned.add(left_frame, minsize=280)
 
-    right_frame = tk.Frame(container)
-    right_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    right_frame = tk.Frame(paned)
+    paned.add(right_frame, minsize=400)
 
     # --- UI Helpers ---
     def get_stat_label(sid: str) -> str:
@@ -90,7 +91,7 @@ def create_stats_info_view(
             color = "#ff8888" if val < 0 else "#b8f5b8"
             tk.Label(row, text=f"{target_name}: {sign}{val}", bg=ROW_BG, fg=color).pack(side="left")
             def rm(i=idx): current_modifiers.pop(i); render_modifiers()
-            tk.Button(row, text="x", command=rm, bg="#3a1a1a", fg="#ff8888", bd=0, padx=4).pack(side="right")
+            ModernButton(row, text="x", command=rm, bg="#3a1a1a", fg="#ff8888", bd=0, padx=4).pack(side="right")
 
     def populate_edit_fields(stat: dict):
         edit_widgets["entry_label"].delete(0, "end"); edit_widgets["entry_label"].insert(0, stat["label"])
@@ -149,7 +150,6 @@ def create_stats_info_view(
             for w in row_widgets: bind_events(w)
             
         inner.update_idletasks()
-        # FIXED: Logic for setting width moved to list_panel.py check_scroll
 
     def on_filter_change(*_):
         q = list_widgets["search_var"].get().strip().lower()

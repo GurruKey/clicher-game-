@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from .theme import ModernButton
 
 class ReassignDialog(tk.Toplevel):
     def __init__(self, parent, title, message, candidates):
@@ -24,8 +25,8 @@ class ReassignDialog(tk.Toplevel):
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
         
-        tk.Button(btn_frame, text="Confirm", command=self.on_ok, width=10).pack(side="left", padx=5)
-        tk.Button(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side="left", padx=5)
+        ModernButton(btn_frame, text="Confirm", command=self.on_ok, width=10).pack(side="left", padx=5)
+        ModernButton(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side="left", padx=5)
         
         self.transient(parent)
         self.grab_set()
@@ -59,8 +60,8 @@ class RenameDialog(tk.Toplevel):
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
         
-        tk.Button(btn_frame, text="Confirm", command=self.on_ok, width=10).pack(side="left", padx=5)
-        tk.Button(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side="left", padx=5)
+        ModernButton(btn_frame, text="Confirm", command=self.on_ok, width=10).pack(side="left", padx=5)
+        ModernButton(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side="left", padx=5)
         
         self.transient(parent)
         self.grab_set()
@@ -102,8 +103,8 @@ class DeleteConflictDialog(tk.Toplevel):
              # Use a normal frame and buttons like other dialogs for better visibility
              btn_frame = tk.Frame(self)
              btn_frame.pack(pady=10)
-             tk.Button(btn_frame, text="Delete", command=self.on_purge, bg="#ffdddd", width=10).pack(side="left", padx=5)
-             tk.Button(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side="left", padx=5)
+             ModernButton(btn_frame, text="Delete", command=self.on_purge, bg="#ffdddd", fg="black", width=10).pack(side="left", padx=5)
+             ModernButton(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side="left", padx=5)
         else:
             # Option 1: Replace
             frame_replace = tk.LabelFrame(self, text="Option 1: Replace Incoming", padx=10, pady=10)
@@ -117,17 +118,17 @@ class DeleteConflictDialog(tk.Toplevel):
             if candidates:
                 self.combo.current(0)
                 
-            tk.Button(frame_replace, text="Replace & Delete", command=self.on_replace, bg="#d0d0d0").pack(side="right", padx=5)
+            ModernButton(frame_replace, text="Replace & Delete", command=self.on_replace, bg="#d0d0d0", fg="black").pack(side="right", padx=5)
             
             # Option 2: Purge
             frame_purge = tk.LabelFrame(self, text="Option 2: Purge Incoming", padx=10, pady=10)
             frame_purge.pack(fill="x", padx=10, pady=5)
             
             tk.Label(frame_purge, text="Remove references from dependent stats.").pack(anchor="w")
-            tk.Button(frame_purge, text="Purge & Delete", command=self.on_purge, bg="#ffdddd").pack(side="right", padx=5)
+            ModernButton(frame_purge, text="Purge & Delete", command=self.on_purge, bg="#ffdddd", fg="black").pack(side="right", padx=5)
             
             # Cancel
-            tk.Button(self, text="Cancel", command=self.destroy, pady=5).pack(pady=10, fill="x", padx=20)
+            ModernButton(self, text="Cancel", command=self.destroy, pady=5).pack(pady=10, fill="x", padx=20)
         
         self.transient(parent)
         self.grab_set()

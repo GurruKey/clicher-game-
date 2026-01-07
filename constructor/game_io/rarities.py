@@ -17,15 +17,17 @@ def parse_rarities(rarity_root: Path) -> list[dict]:
             continue
 
         text = file_path.read_text(encoding="utf-8")
-        id_match = re.search(r'id\s*:\s*"([^"]+)"', text)
+        # UPDATED: Use extract_field for consistent quote handling
+        rarity_id = extract_field(text, "id")
         label = extract_field(text, "label")
-        color_match = re.search(r'color\s*:\s*"([^"]+)"', text)
-        if id_match and color_match:
+        color = extract_field(text, "color")
+        
+        if rarity_id and color:
             rarities.append(
                 {
-                    "id": id_match.group(1),
-                    "label": label if label else id_match.group(1),
-                    "color": color_match.group(1)
+                    "id": rarity_id,
+                    "label": label if label else rarity_id,
+                    "color": color
                 }
             )
 

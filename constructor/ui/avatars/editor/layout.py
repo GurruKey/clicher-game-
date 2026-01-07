@@ -1,11 +1,8 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Callable
 import tkinter as tk
-
-from ...theme import DIVIDER_COLOR
-
+from ...theme import DIVIDER_COLOR, ModernPanedWindow
 
 @dataclass
 class AvatarEditorLayout:
@@ -17,14 +14,9 @@ class AvatarEditorLayout:
     assets_frame: tk.Frame
     show_status: Callable[[str, int | None], None]
 
-
 def create_avatar_editor_layout(parent: tk.Frame) -> AvatarEditorLayout:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0)
-    container.columnconfigure(1, weight=0)
-    container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
     status_var = tk.StringVar(value="")
     status_label = tk.Label(
@@ -53,14 +45,14 @@ def create_avatar_editor_layout(parent: tk.Frame) -> AvatarEditorLayout:
                 status_label.place_forget
             )
 
-    list_frame = tk.Frame(container)
-    list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    main_paned = ModernPanedWindow(container, horizontal=True)
+    main_paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    list_frame = tk.Frame(main_paned)
+    main_paned.add(list_frame, minsize=280)
 
-    detail_frame = tk.Frame(container)
-    detail_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    detail_frame = tk.Frame(main_paned)
+    main_paned.add(detail_frame, minsize=600)
 
     content_row = tk.Frame(detail_frame)
     content_row.pack(anchor="nw", pady=(12, 8), fill="both", expand=True)
@@ -72,12 +64,7 @@ def create_avatar_editor_layout(parent: tk.Frame) -> AvatarEditorLayout:
     controls_frame.grid(row=0, column=0, sticky="nw")
 
     preview_assets_frame = tk.Frame(content_row)
-    preview_assets_frame.grid(
-        row=0,
-        column=1,
-        sticky="nsew",
-        padx=(16, 0)
-    )
+    preview_assets_frame.grid(row=0, column=1, sticky="nsew", padx=(16, 0))
     preview_assets_frame.columnconfigure(0, weight=1)
 
     preview_frame = tk.Frame(preview_assets_frame)

@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from game_io.race_levels import delete_race_level, parse_race_levels, save_race_level
+from ....theme import ModernButton
 
 
 class RaceViewLevelActionsMixin:
@@ -329,7 +330,7 @@ class RaceViewLevelActionsMixin:
             self.level_edit_error_var.set("")
             selector.destroy()
 
-        tk.Button(selector, text="Restore", command=apply_restore).pack(
+        ModernButton(selector, text="Restore", command=apply_restore).pack(
             pady=(0, 12)
         )
 
@@ -381,7 +382,7 @@ class RaceViewLevelActionsMixin:
             self.level_edit_error_var.set("")
             selector.destroy()
 
-        tk.Button(selector, text="Replace", command=apply_replace).pack(
+        ModernButton(selector, text="Replace", command=apply_replace).pack(
             pady=(0, 12)
         )
 
@@ -494,7 +495,7 @@ class RaceViewLevelActionsMixin:
                 self.level_edit_error_var.set("Deleted and replaced.")
                 selector.destroy()
 
-            tk.Button(selector, text="Replace and Delete", command=apply_replace_and_delete).pack(pady=12)
+            ModernButton(selector, text="Replace and Delete", command=apply_replace_and_delete).pack(pady=12)
 
         else: # Not in use
             if not messagebox.askyesno(

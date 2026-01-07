@@ -7,26 +7,24 @@ from .theme import (
     ROW_HOVER_BG,
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
-    create_scrollbar
+    ScrollableFrame,
+    ModernPanedWindow
 )
 
 
 def create_help_view(parent: tk.Frame, paths: list[dict]) -> None:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0)
-    container.columnconfigure(1, weight=0)
-    container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
-    list_frame = tk.Frame(container)
-    list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    # UPDATED: Use ModernPanedWindow
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    list_frame = tk.Frame(paned)
+    paned.add(list_frame, minsize=280)
 
-    detail_frame = tk.Frame(container)
-    detail_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    detail_frame = tk.Frame(paned)
+    paned.add(detail_frame, minsize=400)
 
     detail_title = tk.Label(
         detail_frame, text="Select a section", font=("Segoe UI", 12, "bold")
@@ -51,19 +49,10 @@ def create_help_view(parent: tk.Frame, paths: list[dict]) -> None:
         toast_label.pack(anchor="se", pady=(12, 0))
         parent.after(1000, toast_label.pack_forget)
 
-    canvas = tk.Canvas(list_frame, width=260, highlightthickness=0)
-    scrollbar = create_scrollbar(list_frame, orient="vertical", command=canvas.yview)
-    inner = tk.Frame(canvas)
-
-    def on_configure(_event) -> None:
-        canvas.configure(scrollregion=canvas.bbox("all"))
-
-    inner.bind("<Configure>", on_configure)
-    canvas.create_window((0, 0), window=inner, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    canvas.pack(side="left", fill="y", expand=False)
-    scrollbar.pack(side="right", fill="y")
+    # Help Sections List using ScrollableFrame
+    scroll_view = ScrollableFrame(list_frame, auto_hide=True, min_width=260)
+    scroll_view.pack(side="left", fill="both", expand=True)
+    inner = scroll_view.inner_frame
 
     row_bg = ROW_BG
     row_hover_bg = ROW_HOVER_BG

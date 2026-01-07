@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from ....theme import ScrollableFrame
+from ....theme import ScrollableFrame, create_scrollbar, ModernButton
 
 from .race_view_editor_ui import build_editor_ui
 from .race_view_level_editor_ui import build_level_editor_ui
@@ -77,11 +77,11 @@ class RaceViewBase:
         )
         self.search_entry.pack(side="left", padx=(8, 0))
 
-        # Race List using ScrollableFrame
+        # UPDATED: Race List using ScrollableFrame
         self.race_scroll_view = ScrollableFrame(self.race_frame, auto_hide=True, min_width=220)
         self.race_scroll_view.pack(fill="both", expand=True)
-        self.race_inner = self.race_scroll_view.inner_frame
         self.race_canvas = self.race_scroll_view.canvas
+        self.race_inner = self.race_scroll_view.inner_frame
 
         # Actions
         self.action_row = tk.Frame(self.race_frame)
@@ -90,18 +90,18 @@ class RaceViewBase:
         self.action_wrap = tk.Frame(self.action_row)
         self.action_wrap.pack(anchor="center")
 
-        self.create_button = tk.Button(
-            self.action_wrap, text="Create", command=lambda: None, width=12, height=2
+        self.create_button = ModernButton(
+            self.action_wrap, text="Create", command=lambda: None, width=12
         )
         self.create_button.pack(side="left")
 
-        self.edit_button = tk.Button(
-            self.action_wrap, text="Edit", command=lambda: None, width=12, height=2
+        self.edit_button = ModernButton(
+            self.action_wrap, text="Edit", command=lambda: None, width=12
         )
         self.edit_button.pack(side="left", padx=(12, 0))
 
-        self.exit_button = tk.Button(
-            self.action_wrap, text="Exit", command=lambda: None, width=12, height=2
+        self.exit_button = ModernButton(
+            self.action_wrap, text="Exit", command=lambda: None, width=12
         )
         self.exit_button.pack(side="left", padx=(12, 0))
 
@@ -111,11 +111,11 @@ class RaceViewBase:
         )
         self.level_title.pack(anchor="nw")
 
-        # Level List using ScrollableFrame
+        # UPDATED: Level List using ScrollableFrame
         self.level_scroll_view = ScrollableFrame(self.level_frame, auto_hide=True, min_width=160)
         self.level_scroll_view.pack(fill="both", expand=True, pady=(8, 0))
-        self.level_inner = self.level_scroll_view.inner_frame
         self.level_canvas = self.level_scroll_view.canvas
+        self.level_inner = self.level_scroll_view.inner_frame
 
         # --- Variants Column ---
         self.variant_title = tk.Label(
@@ -123,11 +123,11 @@ class RaceViewBase:
         )
         self.variant_title.pack(anchor="nw")
 
-        # Variant List using ScrollableFrame
+        # UPDATED: Variant List using ScrollableFrame
         self.variant_scroll_view = ScrollableFrame(self.variant_frame, auto_hide=True, min_width=220)
         self.variant_scroll_view.pack(fill="both", expand=True, pady=(8, 0))
-        self.variant_inner = self.variant_scroll_view.inner_frame
         self.variant_canvas = self.variant_scroll_view.canvas
+        self.variant_inner = self.variant_scroll_view.inner_frame
         
         # Variant Actions (New)
         self.variant_action_row = tk.Frame(self.variant_frame)
@@ -136,14 +136,14 @@ class RaceViewBase:
         self.variant_action_wrap = tk.Frame(self.variant_action_row)
         self.variant_action_wrap.pack(anchor="center")
         
-        self.variant_toggle_button = tk.Button(
-            self.variant_action_wrap, text="Create/Edit", width=12, height=2,
+        self.variant_toggle_button = ModernButton(
+            self.variant_action_wrap, text="Create/Edit", width=12,
             command=lambda: None
         )
         self.variant_toggle_button.pack(side="left")
         
-        self.variant_exit_button = tk.Button(
-            self.variant_action_wrap, text="Exit", width=12, height=2, state="disabled",
+        self.variant_exit_button = ModernButton(
+            self.variant_action_wrap, text="Exit", width=12, state="disabled",
             command=lambda: None
         )
         self.variant_exit_button.pack(side="left", padx=(12, 0))
@@ -165,3 +165,9 @@ class RaceViewBase:
 
         build_editor_ui(self)
         build_level_editor_ui(self)
+
+    def _bind_scroll_region(self, canvas: tk.Canvas, inner: tk.Frame) -> None:
+        """Compatibility method for editor UI components."""
+        def on_configure(_event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+        inner.bind("<Configure>", on_configure)

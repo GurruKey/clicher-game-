@@ -4,6 +4,7 @@ from tkinter import messagebox
 
 from game_io.race_tags import parse_race_tags, save_race_tag
 from game_io.races import parse_races, save_race
+from ....theme import ModernButton
 
 
 class RaceViewTagActionMixin:
@@ -244,7 +245,7 @@ class RaceViewTagActionMixin:
                 self.tag_error_var.set("Deleted and replaced references.")
                 selector.destroy()
 
-            tk.Button(selector, text="Replace and Delete", command=apply_replace_and_delete).pack(pady=12)
+            ModernButton(selector, text="Replace and Delete", command=apply_replace_and_delete).pack(pady=12)
 
         else:  # Not in use
             if not messagebox.askyesno(

@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from game_io.races import parse_races, save_race
+from ....theme import ModernButton
 
 
 class RaceViewRaceActionMixin:
@@ -210,7 +211,7 @@ class RaceViewRaceActionMixin:
             self.race_error_var.set(f"Replaced {race_id} with {replacement_id}.")
             selector.destroy()
 
-        tk.Button(selector, text="Replace", command=apply_replacement).pack(
+        ModernButton(selector, text="Replace", command=apply_replacement).pack(
             pady=(0, 12)
         )
 
@@ -302,7 +303,7 @@ class RaceViewRaceActionMixin:
                 self.race_error_var.set("Deleted and replaced references.")
                 selector.destroy()
 
-            tk.Button(selector, text="Replace and Delete", command=apply_replace_and_delete).pack(pady=12)
+            ModernButton(selector, text="Replace and Delete", command=apply_replace_and_delete).pack(pady=12)
 
         else:  # Not in use
             if not messagebox.askyesno(

@@ -10,14 +10,11 @@ class AvatarPreviewPanel:
     def __init__(
         self,
         parent: tk.Frame,
-        preview_frame: tk.Frame,
-        drag_controller,
-        detail_title: tk.Label
+        preview_frame: tk.Frame
     ) -> None:
         self._parent = parent
         self._preview_frame = preview_frame
-        self._drag_controller = drag_controller
-        self._detail_title = detail_title
+        self._drag_controller = None  # Will be set later
 
         self._renderer = AvatarRenderer()
         self._preview_images: list[tk.PhotoImage] = []
@@ -28,6 +25,24 @@ class AvatarPreviewPanel:
         self._image_cache: dict[tuple, tk.PhotoImage] = {}
 
         self._build_preview()
+
+    def set_drag_controller(self, controller) -> None:
+        self._drag_controller = controller
+        # Re-bind events now that we have the controller
+        self._preview_canvas.bind(
+            "<ButtonPress-1>",
+            lambda event: self._drag_controller.start_drag(event, "icon") if self._drag_controller else None
+        )
+        self._preview_canvas.bind("<B1-Motion>", lambda event: self._drag_controller.update_drag(event) if self._drag_controller else None)
+        self._preview_canvas.bind("<ButtonRelease-1>", lambda event: self._drag_controller.end_drag(event) if self._drag_controller else None)
+        self._preview_canvas.bind("<Leave>", lambda event: self._drag_controller.end_drag(event) if self._drag_controller else None)
+
+        self._preview_canvas.bind(
+            "<ButtonPress-3>",
+            lambda event: self._drag_controller.start_drag(event, "bg") if self._drag_controller else None
+        )
+        self._preview_canvas.bind("<B3-Motion>", lambda event: self._drag_controller.update_drag(event) if self._drag_controller else None)
+        self._preview_canvas.bind("<ButtonRelease-3>", lambda event: self._drag_controller.end_drag(event) if self._drag_controller else None)
 
     def snapshot_focus(self, avatar: dict) -> dict:
         icon_offset = avatar.get("iconOffset") or {}
@@ -98,8 +113,12 @@ class AvatarPreviewPanel:
                     fast=False
                 )
 
-    def show_avatar(self, avatar: dict, force: bool = False, fast: bool = False) -> None:
-        self._detail_title.config(text=avatar["name"])
+    def show_avatar(self, avatar: dict | None, force: bool = False, fast: bool = False) -> None:
+        if not avatar:
+            self._render_preview(self._preview_canvas, None)
+            self._render_preview(self._original_canvas, None)
+            return
+
         cached = self._preview_cache.get(avatar["id"])
         preview_override = avatar.get("_previewBg") or avatar.get("_previewIcon")
         if cached and not force and not fast and not preview_override:
@@ -179,21 +198,6 @@ class AvatarPreviewPanel:
             bg=self._preview_frame.cget("bg")
         )
         self._original_canvas.grid(row=1, column=1, sticky="w", padx=(16, 0), pady=(4, 0))
-
-        self._preview_canvas.bind(
-            "<ButtonPress-1>",
-            lambda event: self._drag_controller.start_drag(event, "icon")
-        )
-        self._preview_canvas.bind("<B1-Motion>", self._drag_controller.update_drag)
-        self._preview_canvas.bind("<ButtonRelease-1>", self._drag_controller.end_drag)
-        self._preview_canvas.bind("<Leave>", self._drag_controller.end_drag)
-
-        self._preview_canvas.bind(
-            "<ButtonPress-3>",
-            lambda event: self._drag_controller.start_drag(event, "bg")
-        )
-        self._preview_canvas.bind("<B3-Motion>", self._drag_controller.update_drag)
-        self._preview_canvas.bind("<ButtonRelease-3>", self._drag_controller.end_drag)
 
         self._render_preview(self._preview_canvas, None)
         self._render_preview(self._original_canvas, None)

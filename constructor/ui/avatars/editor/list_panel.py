@@ -8,7 +8,7 @@ from ...theme import (
     ROW_HOVER_BG,
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
-    create_scrollbar
+    ScrollableFrame
 )
 
 from constants import SLOT_BG, SLOT_BORDER
@@ -47,22 +47,11 @@ class AvatarListPanel:
         search_entry = tk.Entry(search_row, textvariable=self._search_var, width=22)
         search_entry.pack(side="left", padx=(8, 0))
 
-        canvas = tk.Canvas(parent, width=260, highlightthickness=0)
-        scrollbar = create_scrollbar(parent, orient="vertical", command=canvas.yview)
-        inner = tk.Frame(canvas)
-        canvas.create_window((0, 0), window=inner, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        def on_configure(_event) -> None:
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        inner.bind("<Configure>", on_configure)
-
-        canvas.pack(side="left", fill="y", expand=False)
-        scrollbar.pack(side="right", fill="y")
-
-        self._canvas = canvas
-        self._inner = inner
+        # Avatar List using ScrollableFrame
+        self._scroll_view = ScrollableFrame(parent, auto_hide=True, min_width=260)
+        self._scroll_view.pack(side="left", fill="y", expand=False)
+        self._inner = self._scroll_view.inner_frame
+        self._canvas = self._scroll_view.canvas
 
         self._search_index = self._build_search_index()
         self._render_list([avatar for avatar, _blob in self._search_index])

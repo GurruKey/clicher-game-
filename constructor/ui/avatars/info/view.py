@@ -8,7 +8,8 @@ from ...theme import (
     ROW_HOVER_BG,
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
-    create_scrollbar
+    ScrollableFrame,
+    ModernPanedWindow
 )
 
 from constants import TOOLTIP_BG, TOOLTIP_BORDER, SLOT_BG, SLOT_BORDER
@@ -19,19 +20,16 @@ from ..common import build_layer
 def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0)
-    container.columnconfigure(1, weight=0)
-    container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
-    list_frame = tk.Frame(container)
-    list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    # UPDATED: Use ModernPanedWindow for resizable layout
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    list_frame = tk.Frame(paned)
+    paned.add(list_frame, minsize=280)
 
-    detail_frame = tk.Frame(container)
-    detail_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    detail_frame = tk.Frame(paned)
+    paned.add(detail_frame, minsize=400)
 
     detail_title = tk.Label(
         detail_frame, text="Select an avatar", font=("Segoe UI", 12, "bold")
@@ -71,19 +69,11 @@ def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
     search_entry = tk.Entry(search_row, textvariable=search_var, width=22)
     search_entry.pack(side="left", padx=(8, 0))
 
-    canvas = tk.Canvas(list_frame, width=260, highlightthickness=0)
-    scrollbar = create_scrollbar(list_frame, orient="vertical", command=canvas.yview)
-    inner = tk.Frame(canvas)
-
-    def on_configure(_event) -> None:
-        canvas.configure(scrollregion=canvas.bbox("all"))
-
-    inner.bind("<Configure>", on_configure)
-    canvas.create_window((0, 0), window=inner, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    canvas.pack(side="left", fill="y", expand=False)
-    scrollbar.pack(side="right", fill="y")
+    # Avatar List using ScrollableFrame
+    scroll_view = ScrollableFrame(list_frame, auto_hide=True, min_width=260)
+    scroll_view.pack(side="left", fill="both", expand=True)
+    inner = scroll_view.inner_frame
+    canvas = scroll_view.canvas
 
     view_images: list[tk.PhotoImage] = []
     preview_images: list[tk.PhotoImage] = []
@@ -101,7 +91,6 @@ def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
     row_selected_bg = ROW_SELECTED_BG
     row_selected_hover_bg = ROW_SELECTED_HOVER_BG
     row_border = ROW_BORDER
-
 
     def update_row_styles() -> None:
         for entry in row_entries:

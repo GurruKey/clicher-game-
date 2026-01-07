@@ -1,7 +1,6 @@
 from pathlib import Path
 import tkinter as tk
 import tkinter.font as tkfont
-
 from constants import DEFAULT_RARITY_COLORS, TOOLTIP_BG, TOOLTIP_BORDER, SLOT_BG, SLOT_BORDER
 from .theme import (
     DIVIDER_COLOR,
@@ -10,10 +9,11 @@ from .theme import (
     ROW_HOVER_BG,
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
-    create_scrollbar
+    ScrollableFrame,
+    ModernPanedWindow,
+    ModernButton
 )
 from .ui_common import draw_rounded_rect
-
 
 def create_items_view(
     parent: tk.Frame,
@@ -24,19 +24,15 @@ def create_items_view(
 ) -> None:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0)
-    container.columnconfigure(1, weight=0)
-    container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
-    list_frame = tk.Frame(container)
-    list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    list_frame = tk.Frame(paned)
+    paned.add(list_frame, minsize=280)
 
-    detail_frame = tk.Frame(container)
-    detail_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    detail_frame = tk.Frame(paned)
+    paned.add(detail_frame, minsize=400)
 
     detail_title = tk.Label(
         detail_frame, text="Select an item", font=("Segoe UI", 12, "bold")
@@ -69,9 +65,7 @@ def create_items_view(
     search_row = tk.Frame(list_frame)
     search_row.pack(fill="x", pady=(0, 8))
 
-    search_label = tk.Label(search_row, text="Search")
-    search_label.pack(side="left")
-
+    tk.Label(search_row, text="Search").pack(side="left")
     search_var = tk.StringVar()
     search_entry = tk.Entry(search_row, textvariable=search_var, width=22)
     search_entry.pack(side="left", padx=(8, 0))
@@ -94,22 +88,11 @@ def create_items_view(
     type_menu = tk.Menu(type_button, tearoff=0)
     type_button.config(menu=type_menu)
 
-    reset_button = tk.Button(filter_row, text="Reset")
-    reset_button.pack(side="left")
+    ModernButton(filter_row, text="Reset", command=lambda: reset_filters()).pack(side="left")
 
-    canvas = tk.Canvas(list_frame, width=260, highlightthickness=0)
-    scrollbar = create_scrollbar(list_frame, orient="vertical", command=canvas.yview)
-    inner = tk.Frame(canvas)
-
-    def on_configure(_event) -> None:
-        canvas.configure(scrollregion=canvas.bbox("all"))
-
-    inner.bind("<Configure>", on_configure)
-    canvas.create_window((0, 0), window=inner, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    canvas.pack(side="left", fill="y", expand=False)
-    scrollbar.pack(side="right", fill="y")
+    scroll_view = ScrollableFrame(list_frame, auto_hide=True, min_width=260)
+    scroll_view.pack(side="left", fill="both", expand=True)
+    inner = scroll_view.inner_frame
 
     view_images: list[tk.PhotoImage] = []
     preview_images: list[tk.PhotoImage] = []
@@ -135,9 +118,7 @@ def create_items_view(
                 color = row_hover_bg
             else:
                 color = row_bg
-
-            for widget in widgets:
-                widget.configure(bg=color)
+            for widget in widgets: widget.configure(bg=color)
 
     def select_item(item: dict) -> None:
         nonlocal selected_item_id
@@ -158,28 +139,15 @@ def create_items_view(
 
     def render_preview(icon: tk.PhotoImage | None) -> None:
         preview_canvas.delete("all")
-        draw_rounded_rect(
-            preview_canvas,
-            1,
-            1,
-            63,
-            63,
-            12,
-            fill=SLOT_BG,
-            outline=SLOT_BORDER
-        )
-        if icon:
-            preview_canvas.create_image(32, 32, image=icon)
+        draw_rounded_rect(preview_canvas, 1, 1, 63, 63, 12, fill=SLOT_BG, outline=SLOT_BORDER)
+        if icon: preview_canvas.create_image(32, 32, image=icon)
 
     def get_scaled_icon(icon_path: Path, target: int) -> tk.PhotoImage:
         key = (str(icon_path), target)
-        cached = icon_cache.get(key)
-        if cached:
-            return cached
+        if key in icon_cache: return icon_cache[key]
         image = tk.PhotoImage(file=str(icon_path))
         scale = max(1, image.width() // target)
-        if scale > 1:
-            image = image.subsample(scale, scale)
+        if scale > 1: image = image.subsample(scale, scale)
         icon_cache[key] = image
         return image
 
@@ -187,303 +155,115 @@ def create_items_view(
         tooltip_canvas.delete("all")
         text_width = tooltip_font.measure(text)
         text_height = tooltip_font.metrics("linespace")
-        pad_x = 10
-        pad_y = 6
-        width = text_width + pad_x * 2
-        height = text_height + pad_y * 2
+        pad_x, pad_y = 10, 6
+        width, height = text_width + pad_x * 2, text_height + pad_y * 2
         radius = min(10, height // 2)
         tooltip_canvas.config(width=width, height=height)
-        draw_rounded_rect(
-            tooltip_canvas,
-            1,
-            1,
-            width - 1,
-            height - 1,
-            radius,
-            fill=TOOLTIP_BG,
-            outline=TOOLTIP_BORDER
-        )
-        tooltip_canvas.create_text(
-            width / 2,
-            height / 2,
-            text=text,
-            fill=color,
-            font=tooltip_font
-        )
+        draw_rounded_rect(tooltip_canvas, 1, 1, width - 1, height - 1, radius, fill=TOOLTIP_BG, outline=TOOLTIP_BORDER)
+        tooltip_canvas.create_text(width / 2, height / 2, text=text, fill=color, font=tooltip_font)
 
     def show_item(item: dict) -> None:
         detail_title.config(text=item["name"])
         locations = locations_by_item.get(item["id"], [])
-        details = [
-            f"ID: {item['id']}",
-            f"Category: {item['categoryId']}",
-            f"Type: {item['type']}",
-            f"Rarity: {item['rarity']}",
-            f"Max stack: {item['maxStack']}",
-            f"Accent: {item['accent']}"
-        ]
+        details = [f"ID: {item['id']}", f"Category: {item['categoryId']}", f"Type: {item['type']}", f"Rarity: {item['rarity']}", f"Max stack: {item['maxStack']}", f"Accent: {item['accent']}"]
         if item["type"] == "bag":
             capacity = bag_capacities.get(item["id"])
-            if capacity is not None:
-                details.append(f"Capacity: {capacity}")
-            else:
-                details.append("Capacity: unknown")
+            details.append(f"Capacity: {capacity if capacity is not None else 'unknown'}")
         details.extend(["", "Locations:"])
-        if locations:
-            details.extend([f"- {location}" for location in locations])
-        else:
-            details.append("- None")
+        details.extend([f"- {loc}" for loc in locations] if locations else ["- None"])
         detail_text.config(text="\n".join(details))
-        render_tooltip(
-            item["name"],
-            rarity_colors.get(item["rarity"], DEFAULT_RARITY_COLORS["common"])
-        )
-
+        render_tooltip(item["name"], rarity_colors.get(item["rarity"], DEFAULT_RARITY_COLORS["common"]))
         icon_path = item.get("icon")
         if icon_path and icon_path.exists():
-            preview_target = 44
-            preview_image = get_scaled_icon(icon_path, preview_target)
-
-            preview_images.clear()
-            preview_images.append(preview_image)
+            preview_image = get_scaled_icon(icon_path, 44)
+            preview_images.clear(); preview_images.append(preview_image)
             render_preview(preview_image)
-        else:
-            render_preview(None)
+        else: render_preview(None)
 
     render_tooltip("Select an item", DEFAULT_RARITY_COLORS["common"])
     render_preview(None)
 
     search_index = []
     for item in items:
-        locations = locations_by_item.get(item["id"], [])
-        blob = " ".join(
-            [
-                item["id"],
-                item["name"],
-                item["categoryId"],
-                item["type"],
-                item["rarity"],
-                str(item["maxStack"]),
-                item["accent"],
-                " ".join(locations)
-            ]
-        ).lower()
+        locs = locations_by_item.get(item["id"], [])
+        blob = " ".join([item["id"], item["name"], item["categoryId"], item["type"], item["rarity"], str(item["maxStack"]), item["accent"], " ".join(locs)]).lower()
         search_index.append((item, blob))
 
     def render_list(filtered: list[dict]) -> None:
-        for child in inner.winfo_children():
-            child.destroy()
-        view_images.clear()
-        row_entries.clear()
-
+        for child in inner.winfo_children(): child.destroy()
+        view_images.clear(); row_entries.clear()
         for item in filtered:
-            row = tk.Frame(
-                inner,
-                bg=row_bg,
-                highlightthickness=1,
-                highlightbackground=row_border,
-                highlightcolor=row_border
-            )
+            row = tk.Frame(inner, bg=row_bg, highlightthickness=1, highlightbackground=row_border, highlightcolor=row_border)
             row.pack(fill="x", pady=5)
-
-            row_inner = tk.Frame(row, bg=row_bg)
-            row_inner.pack(fill="x", padx=8, pady=6)
-
-            row_widgets: list[tk.Widget] = [row, row_inner]
-
+            row_inner = tk.Frame(row, bg=row_bg); row_inner.pack(fill="x", padx=8, pady=6)
+            row_widgets = [row, row_inner]
             icon_path = item.get("icon")
             if icon_path and icon_path.exists():
-                target = 40
-                image = get_scaled_icon(icon_path, target)
-                view_images.append(image)
-                icon_label = tk.Label(row_inner, image=image, bg=row_bg)
-                icon_label.pack(side="left", padx=(0, 10))
-                row_widgets.append(icon_label)
+                image = get_scaled_icon(icon_path, 40); view_images.append(image)
+                lbl_icon = tk.Label(row_inner, image=image, bg=row_bg); lbl_icon.pack(side="left", padx=(0, 10)); row_widgets.append(lbl_icon)
             else:
-                icon_placeholder = tk.Label(row_inner, width=6, bg=row_bg)
-                icon_placeholder.pack(side="left", padx=(0, 10))
-                row_widgets.append(icon_placeholder)
-
-            text_label = tk.Label(row_inner, text=item["name"], anchor="w", bg=row_bg)
-            text_label.pack(side="left", fill="x", expand=True)
-            row_widgets.append(text_label)
-
+                lbl_place = tk.Label(row_inner, width=6, bg=row_bg); lbl_place.pack(side="left", padx=(0, 10)); row_widgets.append(lbl_place)
+            lbl_name = tk.Label(row_inner, text=item["name"], anchor="w", bg=row_bg); lbl_name.pack(side="left", fill="x", expand=True); row_widgets.append(lbl_name)
             row_entries.append({"id": item["id"], "widgets": row_widgets})
-
-            def bind_interaction(widget: tk.Widget, item_id: str, current: dict) -> None:
-                widget.bind(
-                    "<Enter>",
-                    lambda _event, current_id=item_id: on_row_enter(current_id)
-                )
-                widget.bind(
-                    "<Leave>",
-                    lambda _event, current_id=item_id: on_row_leave(current_id)
-                )
-                widget.bind(
-                    "<Button-1>",
-                    lambda _event, selected=current: select_item(selected)
-                )
-
-            for widget in row_widgets:
-                bind_interaction(widget, item["id"], item)
-
+            def bind_ev(w, i_id=item["id"], it=item):
+                w.bind("<Enter>", lambda e: on_row_enter(i_id))
+                w.bind("<Leave>", lambda e: on_row_leave(i_id))
+                w.bind("<Button-1>", lambda e: select_item(it))
+            for w in row_widgets: bind_ev(w)
         parent.images = view_images
         update_row_styles()
 
     categories = sorted({item["categoryId"] for item in items})
     rarities = sorted({item["rarity"] for item in items})
     types = sorted({item["type"] for item in items})
-    category_vars: dict[str, tk.BooleanVar] = {}
-    rarity_vars: dict[str, tk.BooleanVar] = {}
-    type_vars: dict[str, tk.BooleanVar] = {}
-
+    category_vars, rarity_vars, type_vars = {}, {}, {}
     is_updating_filters = False
 
-    def get_selected(vars_map: dict[str, tk.BooleanVar]) -> set[str]:
-        return {key for key, var in vars_map.items() if var.get()}
+    def get_selected(vars_map): return {k for k, v in vars_map.items() if v.get()}
+    def update_menu_label(btn, label, vars_map, values):
+        sel = [v for v in values if vars_map.get(v) and vars_map[v].get()]
+        btn.config(text=f"{label}: All" if not values or not sel or len(sel) == len(values) else f"{label}: {len(sel)}")
 
-    def update_menu_label(
-        button: tk.Menubutton,
-        label: str,
-        vars_map: dict[str, tk.BooleanVar],
-        values: list[str]
-    ) -> None:
-        selected = [
-            value
-            for value in values
-            if vars_map.get(value, None) and vars_map[value].get()
-        ]
-        if not values or not selected or len(selected) == len(values):
-            button.config(text=f"{label}: All")
-        else:
-            button.config(text=f"{label}: {len(selected)}")
-
-    def apply_menu_options(
-        menu: tk.Menu,
-        button: tk.Menubutton,
-        label: str,
-        vars_map: dict[str, tk.BooleanVar],
-        values: list[str]
-    ) -> None:
+    def apply_menu_options(menu, btn, label, vars_map, values):
         menu.delete(0, "end")
-
-        def select_all() -> None:
-            for value in values:
-                vars_map.setdefault(value, tk.BooleanVar(value=False)).set(True)
-            on_filter_change()
-
-        def clear_all() -> None:
-            for var in vars_map.values():
-                var.set(False)
-            on_filter_change()
-
-        menu.add_command(label="All", command=select_all)
-        menu.add_command(label="None", command=clear_all)
+        menu.add_command(label="All", command=lambda: [vars_map.setdefault(v, tk.BooleanVar(value=False)).set(True) for v in values] + [on_filter_change()])
+        menu.add_command(label="None", command=lambda: [v.set(False) for v in vars_map.values()] + [on_filter_change()])
         menu.add_separator()
+        for v in values:
+            if v not in vars_map: vars_map[v] = tk.BooleanVar(value=False)
+            menu.add_checkbutton(label=v, variable=vars_map[v], command=on_filter_change)
+        for e in list(vars_map.keys()):
+            if e not in values: vars_map.pop(e)
+        update_menu_label(btn, label, vars_map, values)
 
-        for value in values:
-            var = vars_map.get(value)
-            if var is None:
-                var = tk.BooleanVar(value=False)
-                vars_map[value] = var
-            menu.add_checkbutton(
-                label=value,
-                variable=var,
-                command=on_filter_change
-            )
-
-        for existing in list(vars_map.keys()):
-            if existing not in values:
-                vars_map.pop(existing, None)
-
-        update_menu_label(button, label, vars_map, values)
-
-    def get_filtered_items(
-        query: str,
-        category_filter: set[str],
-        rarity_filter: set[str],
-        type_filter: set[str]
-    ) -> list[dict]:
-        filtered = []
-        for item, blob in search_index:
-            if query and query not in blob:
-                continue
-            if category_filter and item["categoryId"] not in category_filter:
-                continue
-            if rarity_filter and item["rarity"] not in rarity_filter:
-                continue
-            if type_filter and item["type"] not in type_filter:
-                continue
-            filtered.append(item)
-        return filtered
-
-    def refresh_filter_options(
-        query: str,
-        category_filter: set[str],
-        rarity_filter: set[str],
-        type_filter: set[str]
-    ) -> None:
+    def on_filter_change(*_):
         nonlocal is_updating_filters
+        if is_updating_filters: return
         is_updating_filters = True
-
-        category_items = get_filtered_items(query, set(), rarity_filter, type_filter)
-        rarity_items = get_filtered_items(query, category_filter, set(), type_filter)
-        type_items = get_filtered_items(query, category_filter, rarity_filter, set())
-
-        category_values = sorted({item["categoryId"] for item in category_items})
-        rarity_values = sorted({item["rarity"] for item in rarity_items})
-        type_values = sorted({item["type"] for item in type_items})
-
-        apply_menu_options(
-            category_menu, category_button, "Category", category_vars, category_values
-        )
-        apply_menu_options(
-            rarity_menu, rarity_button, "Rarity", rarity_vars, rarity_values
-        )
-        apply_menu_options(
-            type_menu, type_button, "Type", type_vars, type_values
-        )
-
+        q = search_var.get().strip().lower()
+        c_f, r_f, t_f = get_selected(category_vars), get_selected(rarity_vars), get_selected(type_vars)
+        filtered = [it for it, bl in search_index if (not q or q in bl) and (not c_f or it["categoryId"] in c_f) and (not r_f or it["rarity"] in r_f) and (not t_f or it["type"] in t_f)]
+        
+        c_vals = sorted({it["categoryId"] for it in filtered})
+        r_vals = sorted({it["rarity"] for it in filtered})
+        t_vals = sorted({it["type"] for it in filtered})
+        
+        apply_menu_options(category_menu, category_button, "Category", category_vars, categories)
+        apply_menu_options(rarity_menu, rarity_button, "Rarity", rarity_vars, rarities)
+        apply_menu_options(type_menu, type_button, "Type", type_vars, types)
+        
+        render_list(filtered)
         is_updating_filters = False
 
-    def on_filter_change(*_args: object) -> None:
-        nonlocal is_updating_filters
-        if is_updating_filters:
-            return
-        query = search_var.get().strip().lower()
-        category_filter = get_selected(category_vars)
-        rarity_filter = get_selected(rarity_vars)
-        type_filter = get_selected(type_vars)
-
-        refresh_filter_options(query, category_filter, rarity_filter, type_filter)
-        filtered = get_filtered_items(
-            query,
-            get_selected(category_vars),
-            get_selected(rarity_vars),
-            get_selected(type_vars)
-        )
-
-        render_list(filtered)
-
     search_entry.bind("<KeyRelease>", on_filter_change)
-
-    def reset_filters() -> None:
+    def reset_filters():
         search_var.set("")
-        for var in category_vars.values():
-            var.set(False)
-        for var in rarity_vars.values():
-            var.set(False)
-        for var in type_vars.values():
-            var.set(False)
+        for d in [category_vars, rarity_vars, type_vars]:
+            for v in d.values(): v.set(False)
         on_filter_change()
-
-    reset_button.config(command=reset_filters)
 
     apply_menu_options(category_menu, category_button, "Category", category_vars, categories)
     apply_menu_options(rarity_menu, rarity_button, "Rarity", rarity_vars, rarities)
     apply_menu_options(type_menu, type_button, "Type", type_vars, types)
-
-    render_list([item for item, _ in search_index])
-
-    parent.images = view_images
-    parent.preview_images = preview_images
+    render_list([it for it, _ in search_index])
+    parent.images, parent.preview_images = view_images, preview_images

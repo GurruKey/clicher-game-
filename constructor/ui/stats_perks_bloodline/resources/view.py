@@ -5,7 +5,7 @@ import re
 
 from ...theme import (
     DIVIDER_COLOR, ROW_BG, ROW_BORDER, ROW_HOVER_BG, ROW_SELECTED_BG,
-    ROW_SELECTED_HOVER_BG, BUTTON_BG, ScrollableFrame
+    ROW_SELECTED_HOVER_BG, BUTTON_BG, ScrollableFrame, ModernButton
 )
 
 def create_resources_info_view(
@@ -38,8 +38,8 @@ def create_resources_info_view(
     inner = scroll_view.inner_frame
 
     actions_frame = tk.Frame(list_frame); actions_frame.pack(side="bottom", fill="x", pady=(10, 0))
-    btn_create_edit = tk.Button(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8"); btn_create_edit.pack(side="left", fill="x", expand=True, padx=(0, 5))
-    btn_exit = tk.Button(actions_frame, text="Exit", state="disabled"); btn_exit.pack(side="left", fill="x", expand=True, padx=(5, 0))
+    btn_create_edit = ModernButton(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8"); btn_create_edit.pack(side="left", fill="x", expand=True, padx=(0, 5))
+    btn_exit = ModernButton(actions_frame, text="Exit", state="disabled"); btn_exit.pack(side="left", fill="x", expand=True, padx=(5, 0))
 
     detail_title = tk.Label(detail_frame, text="Select a resource", font=("Segoe UI", 12, "bold")); detail_title.pack(anchor="nw")
     detail_text = tk.Label(detail_frame, text="", justify="left", anchor="nw"); detail_text.pack(anchor="nw", pady=(12, 0))
@@ -48,7 +48,7 @@ def create_resources_info_view(
     edit_frame = tk.Frame(detail_frame)
     name_header = tk.Frame(edit_frame); name_header.pack(fill="x")
     tk.Label(name_header, text="Resource Label (Name):").pack(side="left")
-    tk.Button(name_header, text="New", command=lambda: select_resource(None), bg=BUTTON_BG, fg="#b8f5b8", padx=4).pack(side="right")
+    ModernButton(name_header, text="New", command=lambda: select_resource(None), bg=BUTTON_BG, fg="#b8f5b8", padx=4).pack(side="right")
     entry_label = tk.Entry(edit_frame); entry_label.pack(fill="x", pady=(0, 10))
 
     vals_row = tk.Frame(edit_frame); vals_row.pack(fill="x", pady=(0, 5))
@@ -62,17 +62,17 @@ def create_resources_info_view(
     tk.Label(bar_color_row, text="Bar Color:", width=12, anchor="w").pack(side="left")
     entry_color = tk.Entry(bar_color_row, width=12); entry_color.pack(side="left", padx=(5, 0))
     preview_color = tk.Frame(bar_color_row, width=20, height=20, bd=1, relief="solid"); preview_color.pack(side="left", padx=(10, 0))
-    tk.Button(bar_color_row, text="Pick...", command=lambda: pick_color(entry_color, preview_color)).pack(side="left", padx=(10, 0))
+    ModernButton(bar_color_row, text="Pick...", command=lambda: pick_color(entry_color, preview_color)).pack(side="left", padx=(10, 0))
 
     text_color_row = tk.Frame(colors_group); text_color_row.pack(fill="x", pady=(5, 0))
     tk.Label(text_color_row, text="Text Color:", width=12, anchor="w").pack(side="left")
     entry_text_color = tk.Entry(text_color_row, width=12); entry_text_color.pack(side="left", padx=(5, 0))
     preview_text_color = tk.Frame(text_color_row, width=20, height=20, bd=1, relief="solid"); preview_text_color.pack(side="left", padx=(10, 0))
-    tk.Button(text_color_row, text="Pick...", command=lambda: pick_color(entry_text_color, preview_text_color)).pack(side="left", padx=(10, 0))
+    ModernButton(text_color_row, text="Pick...", command=lambda: pick_color(entry_text_color, preview_text_color)).pack(side="left", padx=(10, 0))
 
     btn_save_frame = tk.Frame(edit_frame); btn_save_frame.pack(fill="x", pady=(15, 0))
-    btn_save = tk.Button(btn_save_frame, text="Save Changes", bg="#1f3b1f", fg="#b8f5b8"); btn_save.pack(side="left")
-    btn_delete = tk.Button(btn_save_frame, text="Delete", bg="#5a2a2a", fg="#ffcccc"); btn_delete.pack(side="right")
+    btn_save = ModernButton(btn_save_frame, text="Save Changes", bg="#1f3b1f", fg="#b8f5b8"); btn_save.pack(side="left")
+    btn_delete = ModernButton(btn_save_frame, text="Delete", bg="#5a2a2a", fg="#ffcccc"); btn_delete.pack(side="right")
 
     # --- Logic & Data ---
     row_entries = []; selected_res_id = None; hovered_res_id = None; is_editing = False

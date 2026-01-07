@@ -1,5 +1,7 @@
 import tkinter as tk
 
+from ....theme import ModernButton
+
 
 def build_level_editor_ui(view) -> None:
     view.level_editor_active = False
@@ -11,13 +13,13 @@ def build_level_editor_ui(view) -> None:
     view.level_action_wrap = tk.Frame(view.level_action_row)
     view.level_action_wrap.pack(anchor="center")
 
-    view.level_toggle_button = tk.Button(
-        view.level_action_wrap, text="Create/Edit", width=12, height=2
+    view.level_toggle_button = ModernButton(
+        view.level_action_wrap, text="Create/Edit", width=12
     )
     view.level_toggle_button.pack(side="left")
 
-    view.level_exit_button = tk.Button(
-        view.level_action_wrap, text="Exit", width=12, height=2, state="disabled"
+    view.level_exit_button = ModernButton(
+        view.level_action_wrap, text="Exit", width=12, state="disabled"
     )
     view.level_exit_button.pack(side="left", padx=(12, 0))
 
@@ -80,8 +82,8 @@ def build_level_editor_ui(view) -> None:
     view.level_create_action_row = tk.Frame(view.level_create_panel)
     view.level_create_action_row.pack(fill="x", padx=10, pady=(6, 10))
 
-    view.create_level_button = tk.Button(
-        view.level_create_action_row, text="Create Level", width=14, height=2
+    view.create_level_button = ModernButton(
+        view.level_create_action_row, text="Create Level", width=14
     )
     view.create_level_button.pack(side="left")
 
@@ -107,13 +109,13 @@ def build_level_editor_ui(view) -> None:
     view.level_edit_action_row = tk.Frame(view.level_edit_panel)
     view.level_edit_action_row.pack(fill="x", padx=10, pady=(6, 10))
 
-    view.update_level_button = tk.Button(
-        view.level_edit_action_row, text="Save Changes", width=14, height=2
+    view.update_level_button = ModernButton(
+        view.level_edit_action_row, text="Save Changes", width=14
     )
     view.update_level_button.pack(side="left")
 
-    view.delete_level_button = tk.Button(
-        view.level_edit_action_row, text="Delete", width=12, height=2
+    view.delete_level_button = ModernButton(
+        view.level_edit_action_row, text="Delete", width=12
     )
     view.delete_level_button.pack(side="left", padx=(12, 0))
 
@@ -145,13 +147,13 @@ def build_level_editor_ui(view) -> None:
     view.level_archive_actions = tk.Frame(view.level_archive_panel)
     view.level_archive_actions.pack(fill="x", padx=10, pady=(0, 10), side="bottom")
 
-    view.restore_level_button = tk.Button(
-        view.level_archive_actions, text="Restore", width=12, height=2
+    view.restore_level_button = ModernButton(
+        view.level_archive_actions, text="Restore", width=12
     )
     view.restore_level_button.pack(side="left")
 
-    view.delete_level_archive_button = tk.Button(
-        view.level_archive_actions, text="Delete", width=12, height=2
+    view.delete_level_archive_button = ModernButton(
+        view.level_archive_actions, text="Delete", width=12
     )
     view.delete_level_archive_button.pack(side="left", padx=(12, 0))
 
@@ -200,7 +202,7 @@ def _build_level_form(
     note_entry_row.pack(fill="x", padx=10, pady=(0, 6))
     note_entry = tk.Entry(note_entry_row, textvariable=note_var, width=24)
     note_entry.pack(side="left", fill="x", expand=True)
-    add_button = tk.Button(note_entry_row, text="+", width=3)
+    add_button = ModernButton(note_entry_row, text="+", width=3)
     add_button.pack(side="left", padx=(6, 0))
 
     notes_list = tk.Listbox(panel, height=6, exportselection=False)
@@ -208,7 +210,7 @@ def _build_level_form(
 
     remove_row = tk.Frame(panel)
     remove_row.pack(fill="x", padx=10, pady=(6, 0))
-    remove_button = tk.Button(remove_row, text="Remove Note", width=12)
+    remove_button = ModernButton(remove_row, text="Remove Note", width=12)
     remove_button.pack(side="left")
 
     if mode == "create":

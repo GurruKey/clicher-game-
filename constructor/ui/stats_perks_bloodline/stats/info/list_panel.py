@@ -1,6 +1,6 @@
 import tkinter as tk
 from typing import Callable
-from ....theme import ScrollableFrame
+from ....theme import ScrollableFrame, ModernButton, BUTTON_BG
 
 def create_list_panel(
     parent: tk.Frame,
@@ -22,14 +22,13 @@ def create_list_panel(
     scroll_view.pack(side="top", fill="both", expand=True)
 
     # Actions
-    from ....theme import BUTTON_BG
     actions_frame = tk.Frame(parent)
     actions_frame.pack(side="bottom", fill="x", pady=(10, 0))
 
-    btn_create_edit = tk.Button(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8", command=on_create_edit)
+    btn_create_edit = ModernButton(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8", command=on_create_edit)
     btn_create_edit.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-    btn_exit = tk.Button(actions_frame, text="Exit", state="disabled", command=on_exit)
+    btn_exit = ModernButton(actions_frame, text="Exit", state="disabled", command=on_exit)
     btn_exit.pack(side="left", fill="x", expand=True, padx=(5, 0))
 
     return {

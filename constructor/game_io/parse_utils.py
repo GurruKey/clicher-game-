@@ -47,9 +47,10 @@ def parse_item_blocks(body: str) -> list[tuple[str, str]]:
 
 
 def extract_field(block: str, field: str) -> str | None:
-    match = re.search(rf"{field}\s*:\s*\"([^\"]+)\"", block)
+    # UPDATED: Support both single and double quotes using backreference
+    match = re.search(rf"{field}\s*:\s*([\"'])(.*?)\1", block)
     if match:
-        return match.group(1)
+        return match.group(2)
     return None
 
 

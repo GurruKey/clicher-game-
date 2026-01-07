@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ....theme import create_scrollbar
+from ....theme import ScrollableFrame, ModernButton
 
 
 def build_editor_ui(view) -> None:
@@ -85,18 +85,18 @@ def build_editor_ui(view) -> None:
     view.race_action_row = tk.Frame(view.race_editor)
     view.race_action_row.pack(fill="x", padx=10, pady=(6, 10))
 
-    view.create_race_button = tk.Button(
-        view.race_action_row, text="Create Race", width=12, height=2
+    view.create_race_button = ModernButton(
+        view.race_action_row, text="Create Race", width=12
     )
     view.create_race_button.pack(side="left")
 
-    view.edit_race_button = tk.Button(
-        view.race_action_row, text="Edit", width=12, height=2
+    view.edit_race_button = ModernButton(
+        view.race_action_row, text="Edit", width=12
     )
     view.edit_race_button.pack(side="left", padx=(12, 0))
 
-    view.delete_race_button = tk.Button(
-        view.race_action_row, text="Delete", width=12, height=2
+    view.delete_race_button = ModernButton(
+        view.race_action_row, text="Delete", width=12
     )
     view.delete_race_button.pack(side="left", padx=(12, 0))
 
@@ -120,36 +120,29 @@ def build_editor_ui(view) -> None:
     view.tag_action_row = tk.Frame(view.tag_editor)
     view.tag_action_row.pack(fill="x", padx=10, pady=(6, 10), side="bottom")
 
-    view.create_tag_button = tk.Button(
-        view.tag_action_row, text="Create Tag", width=12, height=2
+    view.create_tag_button = ModernButton(
+        view.tag_action_row, text="Create Tag", width=12
     )
     view.create_tag_button.pack(side="left")
 
-    view.edit_tag_button = tk.Button(
-        view.tag_action_row, text="Edit", width=12, height=2
+    view.edit_tag_button = ModernButton(
+        view.tag_action_row, text="Edit", width=12
     )
     view.edit_tag_button.pack(side="left", padx=(12, 0))
 
-    view.delete_tag_button = tk.Button(
-        view.tag_action_row, text="Delete", width=12, height=2
+    view.delete_tag_button = ModernButton(
+        view.tag_action_row, text="Delete", width=12
     )
     view.delete_tag_button.pack(side="left", padx=(12, 0))
 
     view.tag_list_frame = tk.Frame(view.tag_list_panel)
     view.tag_list_frame.pack(fill="both", expand=True, padx=10, pady=(10, 10))
 
-    view.tag_list_canvas = tk.Canvas(view.tag_list_frame, highlightthickness=0)
-    view.tag_list_scrollbar = create_scrollbar(
-        view.tag_list_frame, orient="vertical", command=view.tag_list_canvas.yview
-    )
-    view.tag_list_inner = tk.Frame(view.tag_list_canvas)
-    view._bind_scroll_region(view.tag_list_canvas, view.tag_list_inner)
-    view.tag_list_canvas.create_window(
-        (0, 0), window=view.tag_list_inner, anchor="nw"
-    )
-    view.tag_list_canvas.configure(yscrollcommand=view.tag_list_scrollbar.set)
-    view.tag_list_canvas.pack(side="left", fill="both", expand=True)
-    view.tag_list_scrollbar.pack(side="right", fill="y")
+    # UPDATED: Use ScrollableFrame for Tags in Editor
+    view.tag_scroll_view = ScrollableFrame(view.tag_list_frame, auto_hide=True, min_width=180)
+    view.tag_scroll_view.pack(fill="both", expand=True)
+    view.tag_list_inner = view.tag_scroll_view.inner_frame
+    view.tag_list_canvas = view.tag_scroll_view.canvas
 
     view.race_archive_search_row = tk.Frame(view.race_archive_panel)
     view.race_archive_search_row.pack(fill="x", padx=10, pady=(10, 6))
@@ -179,13 +172,13 @@ def build_editor_ui(view) -> None:
     view.race_archive_actions = tk.Frame(view.race_archive_panel)
     view.race_archive_actions.pack(fill="x", padx=10, pady=(0, 10), side="bottom")
 
-    view.restore_race_button = tk.Button(
-        view.race_archive_actions, text="Restore", width=12, height=2
+    view.restore_race_button = ModernButton(
+        view.race_archive_actions, text="Restore", width=12
     )
     view.restore_race_button.pack(side="left")
 
-    view.delete_race_archive_button = tk.Button(
-        view.race_archive_actions, text="Delete", width=12, height=2
+    view.delete_race_archive_button = ModernButton(
+        view.race_archive_actions, text="Delete", width=12
     )
     view.delete_race_archive_button.pack(side="left", padx=(12, 0))
 
@@ -212,12 +205,12 @@ def build_editor_ui(view) -> None:
     view.tag_archive_actions = tk.Frame(view.tag_archive_panel)
     view.tag_archive_actions.pack(fill="x", padx=10, pady=(0, 10), side="bottom")
 
-    view.restore_tag_button = tk.Button(
-        view.tag_archive_actions, text="Restore", width=12, height=2
+    view.restore_tag_button = ModernButton(
+        view.tag_archive_actions, text="Restore", width=12
     )
     view.restore_tag_button.pack(side="left")
 
-    view.delete_tag_archive_button = tk.Button(
-        view.tag_archive_actions, text="Delete", width=12, height=2
+    view.delete_tag_archive_button = ModernButton(
+        view.tag_archive_actions, text="Delete", width=12
     )
     view.delete_tag_archive_button.pack(side="left", padx=(12, 0))

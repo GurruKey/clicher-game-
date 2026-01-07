@@ -5,7 +5,7 @@ import shutil
 import tkinter as tk
 from pathlib import Path
 
-from ...theme import ACCENT_COLOR, BORDER_COLOR, create_scrollbar
+from ...theme import ACCENT_COLOR, BORDER_COLOR, ScrollableFrame, ModernButton
 
 
 class AvatarAssetsPanel:
@@ -84,7 +84,6 @@ class AvatarAssetsPanel:
 
         (
             self._icon_assets_inner,
-            self._icon_assets_canvas,
             self._icon_save_button
         ) = self._build_asset_section(
             avatar_assets_frame,
@@ -94,7 +93,6 @@ class AvatarAssetsPanel:
         )
         (
             self._bg_assets_inner,
-            self._bg_assets_canvas,
             self._bg_save_button
         ) = self._build_asset_section(
             bg_assets_frame,
@@ -125,31 +123,20 @@ class AvatarAssetsPanel:
         )
         filter_menu.config(width=8)
         filter_menu.pack(side="left", padx=(6, 0))
-        tk.Button(
+        
+        # UPDATED: Use ModernButton
+        ModernButton(
             filter_row,
             text="Open Folder",
             command=lambda: self._open_folder(asset_dir)
         ).pack(side="left", padx=(10, 0))
 
-        canvas = tk.Canvas(section, height=72, highlightthickness=0)
-        scrollbar = create_scrollbar(
-            section,
-            orient="horizontal",
-            command=canvas.xview
-        )
-        inner = tk.Frame(canvas)
+        scroll_view = ScrollableFrame(section, orient="horizontal", auto_hide=True)
+        scroll_view.canvas.config(height=72)
+        scroll_view.pack(fill="x", padx=8, pady=(0, 6))
 
-        def on_configure(_event) -> None:
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        inner.bind("<Configure>", on_configure)
-        canvas.create_window((0, 0), window=inner, anchor="nw")
-        canvas.configure(xscrollcommand=scrollbar.set)
-
-        canvas.pack(fill="x", padx=8)
-        scrollbar.pack(fill="x", padx=8, pady=(0, 6))
-
-        save_asset_button = tk.Button(
+        # UPDATED: Use ModernButton
+        save_asset_button = ModernButton(
             section,
             text="Save Asset",
             command=lambda: self._save_asset(kind),
@@ -157,7 +144,7 @@ class AvatarAssetsPanel:
         )
         save_asset_button.pack(anchor="ne", padx=8, pady=(0, 6))
 
-        return inner, canvas, save_asset_button
+        return scroll_view.inner_frame, save_asset_button
 
     def _open_folder(self, folder: Path) -> None:
         try:

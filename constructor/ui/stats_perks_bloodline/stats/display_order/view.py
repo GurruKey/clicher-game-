@@ -11,7 +11,8 @@ from ....theme import (
     TEXT_COLOR,
     create_scrollbar,
     DIVIDER_COLOR,
-    ScrollableFrame
+    ScrollableFrame,
+    ModernButton
 )
 
 def create_stats_config_view(
@@ -30,10 +31,10 @@ def create_stats_config_view(
     
     tk.Label(header, text="Stats Display Configuration", font=("Segoe UI", 12, "bold")).pack(side="left")
     
-    btn_save = tk.Button(header, text="Save Configuration", bg="#1f3b1f", fg="#b8f5b8", command=lambda: save_and_exit())
+    btn_save = ModernButton(header, text="Save Configuration", bg="#1f3b1f", fg="#b8f5b8", command=lambda: save_and_exit())
     btn_save.pack(side="right", padx=5)
     
-    btn_back = tk.Button(header, text="Back", command=on_back)
+    btn_back = ModernButton(header, text="Back", command=on_back)
     btn_back.pack(side="right")
 
     # Content
@@ -108,7 +109,7 @@ def create_stats_config_view(
             local_config.append({"id": cat_id, "label": name, "stats": []})
             render_categories()
 
-    btn_add_cat = tk.Button(left_panel, text="+ Add Category", command=add_category)
+    btn_add_cat = ModernButton(left_panel, text="+ Add Category", command=add_category)
     btn_add_cat.pack(anchor="w", pady=5)
 
     def move_cat(idx, delta):
@@ -154,10 +155,10 @@ def create_stats_config_view(
             title_bar = tk.Frame(cf, bg="#252525")
             title_bar.pack(fill="x")
             tk.Label(title_bar, text=cat["label"], font=("Segoe UI", 10, "bold"), bg="#252525").pack(side="left", padx=5)
-            tk.Button(title_bar, text="×", command=lambda i=c_idx: remove_cat(i), bg="#3a1a1a", fg="red", bd=0).pack(side="right")
-            tk.Button(title_bar, text="↓", command=lambda i=c_idx: move_cat(i, 1), bd=0).pack(side="right", padx=2)
-            tk.Button(title_bar, text="↑", command=lambda i=c_idx: move_cat(i, -1), bd=0).pack(side="right", padx=2)
-            tk.Button(title_bar, text="+ Add Selected", command=lambda i=c_idx: add_to_cat(i), bd=0, fg="#b8f5b8", bg="#1f3b1f").pack(side="right", padx=10)
+            ModernButton(title_bar, text="×", command=lambda i=c_idx: remove_cat(i), bg="#3a1a1a", fg="red", bd=0, padx=4).pack(side="right")
+            ModernButton(title_bar, text="↓", command=lambda i=c_idx: move_cat(i, 1), bd=0, padx=4).pack(side="right", padx=2)
+            ModernButton(title_bar, text="↑", command=lambda i=c_idx: move_cat(i, -1), bd=0, padx=4).pack(side="right", padx=2)
+            ModernButton(title_bar, text="+ Add Selected", command=lambda i=c_idx: add_to_cat(i), bd=0, fg="#b8f5b8", bg="#1f3b1f").pack(side="right", padx=10)
             stats_list = cat.get("stats", [])
             if not stats_list:
                 tk.Label(cf, text="Empty category", bg="#1a1a1a", fg="#666").pack(pady=5)
@@ -167,9 +168,9 @@ def create_stats_config_view(
                     s_row.pack(fill="x", padx=20)
                     label = all_stats_map.get(sid, sid)
                     tk.Label(s_row, text=f"• {label}", bg="#1a1a1a").pack(side="left")
-                    tk.Button(s_row, text="x", command=lambda ci=c_idx, si=s_idx: remove_from_cat(ci, si), bg="#1a1a1a", fg="#888", bd=0).pack(side="right")
-                    tk.Button(s_row, text="↓", command=lambda ci=c_idx, si=s_idx: move_stat(ci, si, 1), bg="#1a1a1a", bd=0).pack(side="right", padx=2)
-                    tk.Button(s_row, text="↑", command=lambda ci=c_idx, si=s_idx: move_stat(ci, si, -1), bg="#1a1a1a", bd=0).pack(side="right", padx=2)
+                    ModernButton(s_row, text="x", command=lambda ci=c_idx, si=s_idx: remove_from_cat(ci, si), bg="#1a1a1a", fg="#888", bd=0, padx=4).pack(side="right")
+                    ModernButton(s_row, text="↓", command=lambda ci=c_idx, si=s_idx: move_stat(ci, si, 1), bg="#1a1a1a", bd=0, padx=4).pack(side="right", padx=2)
+                    ModernButton(s_row, text="↑", command=lambda ci=c_idx, si=s_idx: move_stat(ci, si, -1), bg="#1a1a1a", bd=0, padx=4).pack(side="right", padx=2)
 
     def save_and_exit():
         on_save(local_config)

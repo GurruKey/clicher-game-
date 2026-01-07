@@ -1,5 +1,7 @@
 import tkinter as tk
 
+from ....theme import ModernButton
+
 
 class RaceViewSelectMixin:
     def format_level_label(self, level_number: int) -> str:
@@ -200,20 +202,18 @@ class RaceViewSelectMixin:
             icon.pack(side="left")
             register_widget(icon)
 
-            restore_button = tk.Button(
+            restore_button = ModernButton(
                 action_row,
                 text="Restore",
                 width=6,
-                height=1,
                 command=lambda lvl=item["level"]: self.restore_missing_level(lvl)
             )
             restore_button.pack(side="left")
 
-            replace_button = tk.Button(
+            replace_button = ModernButton(
                 action_row,
                 text="Replace",
                 width=6,
-                height=1,
                 command=lambda lvl=item["level"]: self.replace_missing_level(lvl)
             )
             replace_button.pack(side="left", padx=(8, 0))
@@ -262,20 +262,18 @@ class RaceViewSelectMixin:
         icon.pack(side="left")
         register_widget(icon)
 
-        restore_button = tk.Button(
+        restore_button = ModernButton(
             action_row,
             text="Restore",
             width=6,
-            height=1,
             command=lambda rid=item["id"]: self.restore_missing_race(rid)
         )
         restore_button.pack(side="left")
 
-        replace_button = tk.Button(
+        replace_button = ModernButton(
             action_row,
             text="Replace",
             width=6,
-            height=1,
             command=lambda rid=item["id"]: self.replace_missing_race(rid)
         )
         replace_button.pack(side="left", padx=(8, 0))

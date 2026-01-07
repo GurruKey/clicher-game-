@@ -9,8 +9,24 @@ BORDER_COLOR = "#2a2a2a"
 DIVIDER_COLOR = "#2a2a2a"
 TEXT_COLOR = "#e6e6e6"
 TEXT_MUTED = "#a0a0a0"
-TITLE_COLOR = "#ffffff"  # Added TITLE_COLOR
+TITLE_COLOR = "#ffffff"
 ACCENT_COLOR = "#caa830"
+
+# Unlock States (Progression)
+STATE_LOCKED_BG = "#101010"
+STATE_LOCKED_BORDER = "#2a2a2a"
+STATE_LOCKED_FG = "#505050"
+
+STATE_AVAILABLE_BG = "#1b1b1b"
+STATE_AVAILABLE_BORDER = ACCENT_COLOR
+STATE_AVAILABLE_FG = "#ffffff"
+
+STATE_UNLOCKED_BG = "#242424"
+STATE_UNLOCKED_BORDER = "#4a4a4a"
+STATE_UNLOCKED_FG = "#a0a0a0"
+
+CONNECTOR_COLOR_LOCKED = "#2a2a2a"
+CONNECTOR_COLOR_ACTIVE = ACCENT_COLOR
 
 BUTTON_BG = "#1b1b1b"
 BUTTON_ACTIVE_BG = "#2b2b2b"
@@ -181,52 +197,122 @@ def create_scrollbar(parent, orient: str, command):
 
 
 class ScrollableFrame(tk.Frame):
-    def __init__(self, parent, auto_hide=True, min_width=260, **kwargs):
-        # We need a background color for the container frame too
-        bg = kwargs.get("bg", parent.cget("bg") if hasattr(parent, "cget") else BG_COLOR)
+    def __init__(self, parent, auto_hide=True, min_width=260, orient="vertical", **kwargs):
+        bg = kwargs.pop("bg", parent.cget("bg") if hasattr(parent, "cget") else BG_COLOR)
         super().__init__(parent, bg=bg, **kwargs)
         
         self.auto_hide = auto_hide
         self.min_width = min_width
+        self.orient = orient
         
         self.canvas = tk.Canvas(self, highlightthickness=0, bg=bg)
-        self.scrollbar = create_scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollbar = create_scrollbar(self, orient=orient, command=self.canvas.yview if orient=="vertical" else self.canvas.xview)
         self.inner_frame = tk.Frame(self.canvas, bg=bg)
         
         self.window_id = self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        if orient == "vertical":
+            self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        else:
+            self.canvas.configure(xscrollcommand=self.scrollbar.set)
         
         self.inner_frame.bind("<Configure>", self._on_frame_configure)
         self.canvas.bind("<Configure>", self._on_canvas_configure)
         
-        self.canvas.pack(side="left", fill="both", expand=True)
-        # Scrollbar will be packed by _update_scroll_region if needed or if auto_hide is False
+        self.canvas.pack(side="left" if orient=="vertical" else "top", fill="both", expand=True)
 
     def _on_frame_configure(self, event=None):
         self._update_scroll_region()
 
     def _on_canvas_configure(self, event=None):
-        self._sync_width()
+        if self.orient == "vertical":
+            self._sync_width()
+        else:
+            self._sync_height()
         self._update_scroll_region()
 
     def _sync_width(self):
-        # We don't want to sync width if it's during pre-layout (width=1)
-        # but the check_scroll logic in the original files handles this.
-        # Actually, setting it here is safe because it will be called again on proper layout.
         width = max(self.canvas.winfo_width(), self.min_width)
         self.canvas.itemconfig(self.window_id, width=width)
+
+    def _sync_height(self):
+        height = self.canvas.winfo_height()
+        self.canvas.itemconfig(self.window_id, height=height)
 
     def _update_scroll_region(self, event=None):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         if self.auto_hide:
             bbox = self.canvas.bbox("all")
             if not bbox: return
-            content_height = bbox[3] - bbox[1]
-            visible_height = self.canvas.winfo_height()
             
-            if visible_height > 1 and content_height > visible_height:
-                self.scrollbar.pack(side="right", fill="y")
+            if self.orient == "vertical":
+                content_dim = bbox[3] - bbox[1]
+                visible_dim = self.canvas.winfo_height()
+                side = "right"
+                fill = "y"
+            else:
+                content_dim = bbox[2] - bbox[0]
+                visible_dim = self.canvas.winfo_width()
+                side = "bottom"
+                fill = "x"
+            
+            if visible_dim > 1 and content_dim > visible_dim:
+                self.scrollbar.pack(side=side, fill=fill)
             else:
                 self.scrollbar.pack_forget()
         else:
-            self.scrollbar.pack(side="right", fill="y")
+            if self.orient == "vertical":
+                self.scrollbar.pack(side="right", fill="y")
+            else:
+                self.scrollbar.pack(side="bottom", fill="x")
+
+
+class ModernPanedWindow(tk.PanedWindow):
+    def __init__(self, parent, horizontal=True, **kwargs):
+        orient = tk.HORIZONTAL if horizontal else tk.VERTICAL
+        bg = kwargs.pop("bg", "#2a2a2a") 
+        
+        super().__init__(
+            parent, 
+            orient=orient, 
+            bg=bg, 
+            sashrelief="flat", 
+            sashwidth=4, 
+            borderwidth=0, 
+            showhandle=False,
+            **kwargs
+        )
+
+
+class ModernButton(tk.Button):
+    def __init__(self, parent, **kwargs):
+        bg = kwargs.pop("bg", BUTTON_BG)
+        fg = kwargs.pop("fg", TEXT_COLOR)
+        activebackground = kwargs.pop("activebackground", BUTTON_ACTIVE_BG)
+        activeforeground = kwargs.pop("activeforeground", TEXT_COLOR)
+        
+        padx = kwargs.pop("padx", 10)
+        pady = kwargs.pop("pady", 4)
+        
+        super().__init__(
+            parent,
+            bg=bg,
+            fg=fg,
+            activebackground=activebackground,
+            activeforeground=activeforeground,
+            relief="raised",
+            borderwidth=1,
+            padx=padx,
+            pady=pady,
+            **kwargs
+        )
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+
+    def _on_enter(self, event):
+        if self["state"] != "disabled":
+            self.configure(bg=BUTTON_HOVER_BG)
+
+    def _on_leave(self, event):
+        if self["state"] != "disabled":
+            self.configure(bg=BUTTON_BG)

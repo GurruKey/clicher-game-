@@ -1,9 +1,7 @@
 import tkinter as tk
-
 from .editor_panel import AvatarEditorPanel
 from .layout import create_avatar_editor_layout
 from .list_panel import AvatarListPanel
-
 
 def create_avatar_editor_view(
     parent: tk.Frame,

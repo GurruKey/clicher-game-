@@ -67,6 +67,9 @@ def main() -> None:
         "avatar_info": lambda: show_view("avatars", view_builders.build_avatars_view),
         "avatar_editor": lambda: show_view("avatar_editor", view_builders.build_avatar_editor_view),
         "rarities": lambda: show_view("rarities", view_builders.build_rarities_view),
+        # NEW: Rarities sub-menu handler
+        "rarities_info": lambda: show_view("rarities", view_builders.build_rarities_view),
+        
         "locations": lambda: show_view("locations", view_builders.build_locations_view),
         
         # Stats & Perks entry opens Stats by default

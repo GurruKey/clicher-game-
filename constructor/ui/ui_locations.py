@@ -11,7 +11,9 @@ from .theme import (
     ROW_SELECTED_BG,
     ROW_SELECTED_HOVER_BG,
     BUTTON_BG,
-    create_scrollbar
+    ScrollableFrame,
+    ModernPanedWindow,
+    ModernButton
 )
 
 
@@ -26,53 +28,36 @@ def create_locations_view(
 ) -> None:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0)
-    container.columnconfigure(1, weight=0)
-    container.columnconfigure(2, weight=1)
-    container.rowconfigure(0, weight=1)
 
-    list_frame = tk.Frame(container)
-    list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
 
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR)
-    divider.grid(row=0, column=1, sticky="ns")
+    list_frame = tk.Frame(paned)
+    paned.add(list_frame, minsize=280)
 
-    detail_frame = tk.Frame(container)
-    detail_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    detail_frame = tk.Frame(paned)
+    paned.add(detail_frame, minsize=400)
 
-    # --- Left Panel: List & Actions ---
-    list_container = tk.Frame(list_frame)
-    list_container.pack(side="top", fill="both", expand=True)
-
-    canvas = tk.Canvas(list_container, width=260, highlightthickness=0)
-    scrollbar = create_scrollbar(list_container, orient="vertical", command=canvas.yview)
-    inner = tk.Frame(canvas)
-
-    def check_scroll(_event=None) -> None:
-        canvas.configure(scrollregion=canvas.bbox("all"))
-    inner.bind("<Configure>", check_scroll)
-    canvas.create_window((0, 0), window=inner, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-    canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
+    scroll_view = ScrollableFrame(list_frame, auto_hide=True, min_width=260)
+    scroll_view.pack(side="top", fill="both", expand=True)
+    inner = scroll_view.inner_frame
 
     actions_frame = tk.Frame(list_frame)
     actions_frame.pack(side="bottom", fill="x", pady=(10, 0))
 
-    btn_create_edit = tk.Button(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8")
+    # UPDATED: Use ModernButton
+    btn_create_edit = ModernButton(actions_frame, text="Create/Edit", fg="#b8f5b8")
     btn_create_edit.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-    btn_exit_edit = tk.Button(actions_frame, text="Exit", state="disabled")
+    btn_exit_edit = ModernButton(actions_frame, text="Exit", state="disabled")
     btn_exit_edit.pack(side="left", fill="x", expand=True, padx=(5, 0))
 
-    # --- Right Panel: Detail View ---
     detail_title = tk.Label(detail_frame, text="Select a location", font=("Segoe UI", 12, "bold"))
     detail_title.pack(anchor="nw")
 
     detail_text = tk.Label(detail_frame, text="", justify="left", anchor="nw")
     detail_text.pack(anchor="nw", pady=(12, 0))
 
-    # --- Right Panel: Edit View (Hidden) ---
     edit_frame = tk.Frame(detail_frame)
     
     tk.Label(edit_frame, text="Location Name:").pack(anchor="w")
@@ -104,12 +89,13 @@ def create_locations_view(
 
     btn_save_row = tk.Frame(edit_frame)
     btn_save_row.pack(fill="x", pady=(15, 0))
-    btn_save = tk.Button(btn_save_row, text="Save Location", bg="#1f3b1f", fg="#b8f5b8")
+
+    # UPDATED: Use ModernButton
+    btn_save = ModernButton(btn_save_row, text="Save Location", bg="#1f3b1f", fg="#b8f5b8")
     btn_save.pack(side="left")
-    btn_delete = tk.Button(btn_save_row, text="Delete", bg="#5a2a2a", fg="#ffcccc")
+    btn_delete = ModernButton(btn_save_row, text="Delete", bg="#5a2a2a", fg="#ffcccc")
     btn_delete.pack(side="right")
 
-    # --- State ---
     row_entries: list[dict] = []
     selected_loc_id: str | None = None
     hovered_loc_id: str | None = None

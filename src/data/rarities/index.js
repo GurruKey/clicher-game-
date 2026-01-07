@@ -9,7 +9,7 @@ export const RARITIES = {
   [UNCOMMON.id]: UNCOMMON,
   [RARE.id]: RARE,
   [EPIC.id]: EPIC,
-  [LEGENDARY.id]: LEGENDARY
+  [LEGENDARY.id]: LEGENDARY,
 };
 
 export const RARITY_ORDER = [
@@ -17,7 +17,7 @@ export const RARITY_ORDER = [
   UNCOMMON.id,
   RARE.id,
   EPIC.id,
-  LEGENDARY.id
+  LEGENDARY.id,
 ];
 
 export { COMMON, UNCOMMON, RARE, EPIC, LEGENDARY };

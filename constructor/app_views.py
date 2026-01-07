@@ -22,7 +22,8 @@ from ui.ui_help import create_help_view
 from ui.ui_items import create_items_view
 from ui.ui_locations import create_locations_view
 from ui.ui_map import create_map_view
-from ui.ui_rarities import create_rarities_view
+# UPDATED: Import from new location
+from ui.rarities import create_rarities_view
 from ui.dialogs import DeleteConflictDialog, ReassignDialog, RenameDialog
 
 from app_context import AppData, AppPaths

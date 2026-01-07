@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from ....theme import ROW_BG, BUTTON_BG
+from ....theme import ROW_BG, BUTTON_BG, ModernButton
 
 def create_edit_panel(parent: tk.Frame, handlers: dict) -> dict:
     frame = tk.Frame(parent)
@@ -10,7 +10,7 @@ def create_edit_panel(parent: tk.Frame, handlers: dict) -> dict:
     name_header.pack(fill="x")
     tk.Label(name_header, text="Stat Label (Name):").pack(side="left")
     
-    btn_new = tk.Button(name_header, text="New", command=handlers["on_new"], bg=BUTTON_BG, fg="#b8f5b8", padx=4, pady=0)
+    btn_new = ModernButton(name_header, text="New", command=handlers["on_new"], bg=BUTTON_BG, fg="#b8f5b8", padx=4, pady=0)
     btn_new.pack(side="right")
 
     entry_label = tk.Entry(frame)
@@ -38,7 +38,7 @@ def create_edit_panel(parent: tk.Frame, handlers: dict) -> dict:
     stat_var = tk.StringVar()
     combo_stat = ttk.Combobox(stat_row, textvariable=stat_var, state="readonly", width=18)
     combo_stat.pack(side="left", padx=(5, 0))
-    btn_add_stat = tk.Button(stat_row, text="+", width=3, command=handlers["on_add_stat"])
+    btn_add_stat = ModernButton(stat_row, text="+", width=3, command=handlers["on_add_stat"])
     btn_add_stat.pack(side="left", padx=(10, 0))
 
     # Add Res
@@ -48,7 +48,7 @@ def create_edit_panel(parent: tk.Frame, handlers: dict) -> dict:
     res_var = tk.StringVar()
     combo_res = ttk.Combobox(res_row, textvariable=res_var, state="readonly", width=18)
     combo_res.pack(side="left", padx=(5, 0))
-    btn_add_res = tk.Button(res_row, text="+", width=3, command=handlers["on_add_res"])
+    btn_add_res = ModernButton(res_row, text="+", width=3, command=handlers["on_add_res"])
     btn_add_res.pack(side="left", padx=(10, 0))
 
     # Description
@@ -59,16 +59,16 @@ def create_edit_panel(parent: tk.Frame, handlers: dict) -> dict:
     # Save/Delete Actions
     btn_save_frame = tk.Frame(frame)
     btn_save_frame.pack(fill="x", pady=(15, 0))
-    btn_save = tk.Button(btn_save_frame, text="Save Changes", bg="#1f3b1f", fg="#b8f5b8", command=handlers["on_save"])
+    btn_save = ModernButton(btn_save_frame, text="Save Changes", bg="#1f3b1f", fg="#b8f5b8", command=handlers["on_save"])
     btn_save.pack(side="left")
     
-    btn_reassign = tk.Button(btn_save_frame, text="Reassign", command=handlers["on_reassign"])
+    btn_reassign = ModernButton(btn_save_frame, text="Reassign", command=handlers["on_reassign"])
     btn_reassign.pack(side="left", padx=(10, 0))
 
-    btn_replace = tk.Button(btn_save_frame, text="Rename/Merge", command=handlers["on_replace"])
+    btn_replace = ModernButton(btn_save_frame, text="Rename/Merge", command=handlers["on_replace"])
     btn_replace.pack(side="left", padx=(10, 0))
 
-    btn_delete = tk.Button(btn_save_frame, text="Delete", bg="#5a2a2a", fg="#ffcccc", command=handlers["on_delete"])
+    btn_delete = ModernButton(btn_save_frame, text="Delete", bg="#5a2a2a", fg="#ffcccc", command=handlers["on_delete"])
     btn_delete.pack(side="right")
 
     return {

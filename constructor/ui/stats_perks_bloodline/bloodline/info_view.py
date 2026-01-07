@@ -3,7 +3,7 @@ from tkinter import ttk
 from typing import Callable, Any
 
 from ui.ui_common import create_header, create_scrollable_list, create_search_bar
-from ui.theme import PANEL_BG, TEXT_COLOR, TITLE_COLOR, BG_COLOR, ROW_BORDER, ROW_BG, ROW_HOVER_BG, ROW_SELECTED_BG
+from ui.theme import PANEL_BG, TEXT_COLOR, TITLE_COLOR, BG_COLOR, ROW_BORDER, ROW_BG, ROW_HOVER_BG, ROW_SELECTED_BG, ModernPanedWindow
 
 
 def create_bloodline_info_view(
@@ -47,19 +47,14 @@ def create_bloodline_info_view(
     container = tk.Frame(parent, bg=BG_COLOR)
     container.pack(fill="both", expand=True)
 
-    paned_window = tk.PanedWindow(
-        container,
-        orient="horizontal",
-        bg=BG_COLOR,
-        sashwidth=4,
-        sashrelief="flat"
-    )
+    # UPDATED: Use ModernPanedWindow
+    paned_window = ModernPanedWindow(container, horizontal=True)
     paned_window.pack(fill="both", expand=True, padx=10, pady=10)
 
     # --- Left Sidebar ---
     sidebar = tk.Frame(paned_window, bg=PANEL_BG, width=300)
     sidebar.pack_propagate(False)
-    paned_window.add(sidebar)
+    paned_window.add(sidebar, minsize=200)
 
     create_header(sidebar, "Race Variants")
 
@@ -74,7 +69,7 @@ def create_bloodline_info_view(
 
     # --- Right Content ---
     content_area = tk.Frame(paned_window, bg=PANEL_BG)
-    paned_window.add(content_area)
+    paned_window.add(content_area, minsize=400)
 
     details_frame, details_inner = create_scrollable_list(content_area)
 

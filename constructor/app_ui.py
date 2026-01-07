@@ -56,6 +56,11 @@ class UIState:
         self.avatar_icon_button = tk.Button(self.avatar_subbar, text="Icon Editor", command=handlers["avatar_editor"])
         self.avatar_icon_button.pack(side="left", padx=(12, 0))
 
+        # NEW: Rarities subbar
+        self.rarities_subbar = tk.Frame(header)
+        self.rarities_info_button = tk.Button(self.rarities_subbar, text="Info", command=handlers["rarities_info"])
+        self.rarities_info_button.pack(side="left")
+
         self.stats_perks_group_subbar = tk.Frame(header)
         self.stats_group_btn = tk.Button(self.stats_perks_group_subbar, text="Stats", command=handlers["stats_info"])
         self.stats_group_btn.pack(side="left")
@@ -97,12 +102,14 @@ class UIState:
     def set_active_view(self, active: str | None) -> None:
         # Detect Groups
         is_avatar = active in ("avatars", "avatar_editor")
+        # Rarities is now considered a group (even if size 1) to show subbar
+        is_rarities = active == "rarities"
         is_stats_perks_group = active in ("stats_info", "stats_config", "resources_info", "perks_info", "bloodline_info", "bloodline_race")
         
         # 1. Main Styles
         self._apply_active_style(self.items_button, active == "items")
         self._apply_active_style(self.avatar_button, is_avatar)
-        self._apply_active_style(self.rarities_button, active == "rarities")
+        self._apply_active_style(self.rarities_button, is_rarities)
         self._apply_active_style(self.locations_button, active == "locations")
         self._apply_active_style(self.stats_perks_button, is_stats_perks_group)
         self._apply_active_style(self.map_button, active == "map")
@@ -114,6 +121,13 @@ class UIState:
         self._apply_active_style(self.perks_group_btn, active == "perks_info")
         self._apply_active_style(self.bloodline_group_btn, active in ("bloodline_info", "bloodline_race"))
         
+        # Avatar subbar styles
+        self._apply_active_style(self.avatars_info_button, active == "avatars")
+        self._apply_active_style(self.avatar_icon_button, active == "avatar_editor")
+        
+        # Rarities subbar styles
+        self._apply_active_style(self.rarities_info_button, active == "rarities")
+
         # 3. Level 3 (Section) Styles
         self._apply_active_style(self.stats_info_btn, active == "stats_info")
         self._apply_active_style(self.stats_config_btn, active == "stats_config")
@@ -123,12 +137,14 @@ class UIState:
         self._apply_active_style(self.bloodline_race_btn, active == "bloodline_race")
 
         # 4. Visibility Control
-        for bar in (self.avatar_subbar, self.stats_perks_group_subbar, self.stats_section_subbar, 
+        for bar in (self.avatar_subbar, self.rarities_subbar, self.stats_perks_group_subbar, self.stats_section_subbar, 
                     self.resources_section_subbar, self.perks_section_subbar, self.bloodline_section_subbar):
             bar.pack_forget()
 
         if is_avatar:
             self.avatar_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
+        elif is_rarities:
+            self.rarities_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
         elif is_stats_perks_group:
             self.stats_perks_group_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
             if active in ("stats_info", "stats_config"): self.stats_section_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
@@ -140,7 +156,6 @@ class UIState:
 
     def _apply_active_style(self, button: tk.Button, is_active: bool) -> None:
         if is_active:
-            # RESTORED: BUTTON_ACTIVE_FG (Yellow) for both normal and disabled state
             button.config(
                 relief="sunken", 
                 bg=BUTTON_ACTIVE_BG, 
@@ -160,7 +175,9 @@ class UIState:
         return [
             self.items_button, self.avatar_button, self.rarities_button, self.locations_button, 
             self.stats_perks_button, self.map_button, self.help_button, self.exit_button, self.back_button,
-            self.avatars_info_button, self.avatar_icon_button, self.stats_group_btn, self.res_group_btn,
+            self.avatars_info_button, self.avatar_icon_button, 
+            self.rarities_info_button,
+            self.stats_group_btn, self.res_group_btn,
             self.perks_group_btn, self.bloodline_group_btn, self.bloodline_info_btn, self.bloodline_race_btn,
             self.stats_info_btn, self.stats_config_btn, self.resources_info_btn, self.perks_info_btn
         ]

@@ -5,7 +5,7 @@ import re
 
 from ...theme import (
     DIVIDER_COLOR, ROW_BG, ROW_BORDER, ROW_HOVER_BG, ROW_SELECTED_BG,
-    ROW_SELECTED_HOVER_BG, BUTTON_BG, ScrollableFrame
+    ROW_SELECTED_HOVER_BG, BUTTON_BG, ScrollableFrame, ModernPanedWindow, ModernButton
 )
 
 def create_perks_info_view(
@@ -19,11 +19,16 @@ def create_perks_info_view(
 ) -> None:
     container = tk.Frame(parent)
     container.pack(fill="both", expand=True, padx=12, pady=12)
-    container.columnconfigure(0, weight=0); container.columnconfigure(1, weight=0); container.columnconfigure(2, weight=1); container.rowconfigure(0, weight=1)
 
-    list_frame = tk.Frame(container); list_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 10))
-    divider = tk.Frame(container, width=2, bg=DIVIDER_COLOR); divider.grid(row=0, column=1, sticky="ns")
-    detail_frame = tk.Frame(container); detail_frame.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+    # UPDATED: Use ModernPanedWindow for resizable layout
+    paned = ModernPanedWindow(container, horizontal=True)
+    paned.pack(fill="both", expand=True)
+
+    list_frame = tk.Frame(paned)
+    paned.add(list_frame, minsize=280)
+
+    detail_frame = tk.Frame(paned)
+    paned.add(detail_frame, minsize=400)
 
     # --- Search & List ---
     search_row = tk.Frame(list_frame); search_row.pack(side="top", fill="x", pady=(0, 8))
@@ -36,8 +41,8 @@ def create_perks_info_view(
     inner = scroll_view.inner_frame
 
     actions_frame = tk.Frame(list_frame); actions_frame.pack(side="bottom", fill="x", pady=(10, 0))
-    btn_create_edit = tk.Button(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8"); btn_create_edit.pack(side="left", fill="x", expand=True, padx=(0, 5))
-    btn_exit = tk.Button(actions_frame, text="Exit", state="disabled"); btn_exit.pack(side="left", fill="x", expand=True, padx=(5, 0))
+    btn_create_edit = ModernButton(actions_frame, text="Create/Edit", bg=BUTTON_BG, fg="#b8f5b8"); btn_create_edit.pack(side="left", fill="x", expand=True, padx=(0, 5))
+    btn_exit = ModernButton(actions_frame, text="Exit", state="disabled"); btn_exit.pack(side="left", fill="x", expand=True, padx=(5, 0))
 
     detail_title = tk.Label(detail_frame, text="Select a perk", font=("Segoe UI", 12, "bold")); detail_title.pack(anchor="nw")
     detail_text = tk.Label(detail_frame, text="", justify="left", anchor="nw"); detail_text.pack(anchor="nw", pady=(12, 0))
@@ -45,7 +50,7 @@ def create_perks_info_view(
     # --- Edit View ---
     edit_frame = tk.Frame(detail_frame)
     tk.Label(edit_frame, text="Perk Name (Label):").pack(anchor="w")
-    tk.Button(edit_frame, text="New", command=lambda: select_perk(None), bg=BUTTON_BG, fg="#b8f5b8", padx=4).pack(anchor="e")
+    ModernButton(edit_frame, text="New", command=lambda: select_perk(None), bg=BUTTON_BG, fg="#b8f5b8", padx=4).pack(anchor="e")
     entry_name = tk.Entry(edit_frame); entry_name.pack(fill="x", pady=(0, 10))
 
     # Stats Group
@@ -56,7 +61,7 @@ def create_perks_info_view(
     add_stat_row = tk.Frame(edit_frame); add_stat_row.pack(fill="x", pady=(0, 10))
     stat_var = tk.StringVar(); combo_stat = ttk.Combobox(add_stat_row, textvariable=stat_var, state="readonly", width=18); combo_stat.pack(side="left")
     entry_stat_val = tk.Entry(add_stat_row, width=5); entry_stat_val.pack(side="left", padx=5); entry_stat_val.insert(0, "1")
-    btn_add_stat = tk.Button(add_stat_row, text="+", width=3); btn_add_stat.pack(side="left")
+    btn_add_stat = ModernButton(add_stat_row, text="+", width=3); btn_add_stat.pack(side="left")
 
     # Resources Group (Unlock)
     tk.Label(edit_frame, text="Unlock Resources (Visibility):").pack(anchor="w", pady=(10, 0))
@@ -65,11 +70,11 @@ def create_perks_info_view(
 
     add_res_row = tk.Frame(edit_frame); add_res_row.pack(fill="x", pady=(0, 10))
     res_var = tk.StringVar(); combo_res = ttk.Combobox(add_res_row, textvariable=res_var, state="readonly", width=18); combo_res.pack(side="left")
-    btn_add_res = tk.Button(add_res_row, text="+", width=3); btn_add_res.pack(side="left", padx=5)
+    btn_add_res = ModernButton(add_res_row, text="+", width=3); btn_add_res.pack(side="left", padx=5)
 
     btn_save_frame = tk.Frame(edit_frame); btn_save_frame.pack(fill="x", pady=(15, 0))
-    btn_save = tk.Button(btn_save_frame, text="Save Changes", bg="#1f3b1f", fg="#b8f5b8"); btn_save.pack(side="left")
-    btn_delete = tk.Button(btn_save_frame, text="Delete", bg="#5a2a2a", fg="#ffcccc"); btn_delete.pack(side="right")
+    btn_save = ModernButton(btn_save_frame, text="Save Changes", bg="#1f3b1f", fg="#b8f5b8"); btn_save.pack(side="left")
+    btn_delete = ModernButton(btn_save_frame, text="Delete", bg="#5a2a2a", fg="#ffcccc"); btn_delete.pack(side="right")
 
     # --- Logic ---
     row_entries = []; selected_perk_id = None; hovered_perk_id = None; is_editing = False
@@ -85,7 +90,7 @@ def create_perks_info_view(
         for sid, val in current_perk_stats.items():
             r = tk.Frame(stats_list_frame, bg=ROW_BG); r.pack(fill="x")
             tk.Label(r, text=f"{get_stat_label(sid)}: +{val}", bg=ROW_BG, fg="#b8f5b8").pack(side="left")
-            tk.Button(r, text="x", command=lambda s=sid: [current_perk_stats.pop(s), render_stats_list()], bg="#3a1a1a", fg="#ff8888", bd=0).pack(side="right")
+            ModernButton(r, text="x", command=lambda s=sid: [current_perk_stats.pop(s), render_stats_list()], bg="#3a1a1a", fg="#ff8888", bd=0, padx=4).pack(side="right")
 
     def render_res_list():
         for child in res_list_frame.winfo_children(): child.destroy()
@@ -93,7 +98,7 @@ def create_perks_info_view(
         for rid in current_unlocked_res:
             r = tk.Frame(res_list_frame, bg=ROW_BG); r.pack(fill="x")
             tk.Label(r, text=get_res_label(rid), bg=ROW_BG, fg="#b8f5b8").pack(side="left")
-            tk.Button(r, text="x", command=lambda i=rid: [current_unlocked_res.remove(i), render_res_list()], bg="#3a1a1a", fg="#ff8888", bd=0).pack(side="right")
+            ModernButton(r, text="x", command=lambda i=rid: [current_unlocked_res.remove(i), render_res_list()], bg="#3a1a1a", fg="#ff8888", bd=0, padx=4).pack(side="right")
 
     def select_perk(perk):
         nonlocal selected_perk_id; selected_perk_id = perk["id"] if perk else None
@@ -185,7 +190,6 @@ def create_perks_info_view(
         if selected_perk_id and on_delete and on_delete(selected_perk_id):
             nonlocal current_perks, stats_source, resources_source
             if on_refresh:
-                # ВАЖНО: исправлено количество переменных для распаковки (3 вместо 2)
                 current_perks, stats_source, resources_source = on_refresh()
             else:
                 current_perks = [p for p in current_perks if p["id"] != selected_perk_id]
