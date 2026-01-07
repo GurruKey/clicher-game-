@@ -23,6 +23,7 @@ class AppPaths:
     avatars_root: Path
     stats_path: Path
     perks_path: Path
+    resources_path: Path
 
 
 @dataclass(frozen=True)
@@ -53,7 +54,8 @@ def build_paths(constructor_root: Path) -> AppPaths:
         rarities_root=project_root / "src" / "data" / "rarities",
         avatars_root=project_root / "src" / "data" / "avatars",
         stats_path=project_root / "src" / "data" / "stats" / "index.js",
-        perks_path=project_root / "src" / "data" / "perks" / "index.js"
+        perks_path=project_root / "src" / "data" / "perks" / "index.js",
+        resources_path=project_root / "src" / "data" / "resources" / "index.js"
     )
 
 
@@ -113,6 +115,11 @@ def build_help_sources(paths: AppPaths) -> list[dict]:
             "id": "perks",
             "title": "Perks",
             "sources": [str(paths.perks_path)]
+        },
+        {
+            "id": "resources",
+            "title": "Resources",
+            "sources": [str(paths.resources_path)]
         },
         {
             "id": "bags",

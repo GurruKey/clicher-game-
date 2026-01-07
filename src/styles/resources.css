@@ -1,0 +1,97 @@
+.stamina-panel {
+  display: flex;
+  align-items: center;
+  z-index: 6;
+}
+
+.stamina-bar {
+  height: 22px;
+  width: 170px;
+  border-radius: 2px;
+  border: 1px solid rgba(247, 242, 230, 0.2);
+  background: rgba(0, 0, 0, 0.9);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8);
+  margin-left: 0;
+  padding-left: 0;
+  z-index: 1;
+}
+
+.stamina-bar__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 0;
+  transition: width 0.3s ease;
+  
+  /* Simple depth without blur */
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}
+
+.stamina-bar__text {
+  position: relative;
+  z-index: 10;
+  font-family: "Space Mono", "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* Fixed color or set via style */
+  letter-spacing: 0.02em;
+}
+
+/* Dynamic Resources Styles (HUD & Panel) */
+.character-resources {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.character-resource-bar {
+  width: 100%;
+}
+
+.character-resource-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+  font-family: "Khand", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  opacity: 0.9;
+}
+
+.character-resource-track {
+  height: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(247, 242, 230, 0.15);
+  border-radius: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.character-resource-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+  position: relative;
+  
+  /* Minimal overlay for depth */
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}

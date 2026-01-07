@@ -89,13 +89,19 @@ class RaceViewLevelEditorMixin:
         self.level_editor_active = True
         self.current_level_id = None
         self.refresh_race_levels()
-        self.variant_title.pack_forget()
-        self.variant_canvas.pack_forget()
-        self.variant_scrollbar.pack_forget()
-        self.detail_title.pack_forget()
-        self.detail_text.pack_forget()
-        self.level_create_panel.pack(fill="both", expand=True, pady=(8, 0))
-        self.level_edit_container.pack(fill="both", expand=True, pady=(8, 0))
+        
+        # Hide standard columns EXCEPT Level frame
+        self.paned.forget(self.race_frame)
+        self.paned.forget(self.variant_frame)
+        self.paned.forget(self.detail_frame)
+        
+        # Add Level Editor columns
+        self.paned.add(self.level_create_frame, minsize=300, stretch="always")
+        self.paned.add(self.level_edit_frame, minsize=400, stretch="always")
+        
+        self.level_create_panel.pack(fill="both", expand=True, padx=5, pady=5)
+        self.level_edit_container.pack(fill="both", expand=True, padx=5, pady=5)
+        
         self.clear_level_form("create")
         self.clear_level_form("edit")
         self.refresh_archived_levels()
@@ -106,14 +112,25 @@ class RaceViewLevelEditorMixin:
         if not self.level_editor_active:
             return
         self.level_editor_active = False
+        
+        # Hide editor columns
+        self.paned.forget(self.level_create_frame)
+        self.paned.forget(self.level_edit_frame)
         self.level_create_panel.pack_forget()
         self.level_edit_container.pack_forget()
-        self.variant_title.pack(anchor="nw")
-        self.variant_canvas.pack(side="left", fill="both", expand=True, pady=(8, 0))
-        self.variant_scrollbar.pack(side="right", fill="y", pady=(8, 0))
-        self.detail_title.pack(anchor="nw")
-        self.detail_text.pack(anchor="nw", pady=(12, 0))
+        
+        # Restore standard layout: [Races] [Levels] [Variants] [Details]
+        # self.level_frame is currently visible.
+        
+        # Add races BEFORE levels
+        self.paned.add(self.race_frame, before=self.level_frame, minsize=220)
+        
+        # Add variants and details AFTER levels
+        self.paned.add(self.variant_frame, minsize=220) # will append to end
+        self.paned.add(self.detail_frame, minsize=260) # will append to end
+        
         self.update_level_editor_buttons()
+        
         if self.race_state["selected"]:
             selected = next(
                 (item for item in self.race_items if item["id"] == self.race_state["selected"]),
@@ -277,4 +294,3 @@ class RaceViewLevelEditorMixin:
             else:
                 details.append(f"{label}: no variants")
         self.level_archive_detail.config(text="\n".join(details))
-

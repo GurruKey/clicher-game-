@@ -1,53 +1,17 @@
 import React, { useMemo } from "react";
 import { buildStatDetails } from "../../data/stats/index.js";
+import { STATS_DISPLAY_CONFIG } from "../../data/stats/display_config.js";
 import StatsDetailList from "../stats/StatsDetailList.jsx";
 
-const DEFAULT_DETAILS = buildStatDetails(null, 3);
-
 export default function StatsDialog({ isOpen, onClose, avatarMeta }) {
-  const info = useMemo(() => {
-    return {
-      raceStats: avatarMeta?.raceStats ?? DEFAULT_DETAILS,
-      originStats: avatarMeta?.originStats ?? DEFAULT_DETAILS,
-      factionStats: avatarMeta?.factionStats ?? DEFAULT_DETAILS
-    };
-  }, [avatarMeta]);
   const totalStats = useMemo(() => {
-    const totals = {};
-    const addDetails = (details) => {
-      if (!details) {
-        return;
-      }
-      details.forEach((detail) => {
-        const num = Number(detail.value);
-        if (!Number.isFinite(num)) {
-          return;
-        }
-        totals[detail.id] = (totals[detail.id] ?? 0) + num;
-      });
-    };
-    addDetails(info.raceStats);
-    addDetails(info.originStats);
-    addDetails(info.factionStats);
-    if (avatarMeta?.perkStats) {
-      Object.entries(avatarMeta.perkStats).forEach(([key, value]) => {
-        const num = Number(value);
-        if (!Number.isFinite(num)) {
-          return;
-        }
-        totals[key] = (totals[key] ?? 0) + num;
-      });
+    // We prefer the pre-calculated finalStats from avatarMeta logic
+    if (avatarMeta?.finalStats) {
+        return buildStatDetails(avatarMeta.finalStats, 0);
     }
-    if (Number.isFinite(totals.agility)) {
-      totals.stamina = (totals.stamina ?? 0) + totals.agility;
-    }
-    return buildStatDetails(totals, 0);
-  }, [
-    info.raceStats,
-    info.originStats,
-    info.factionStats,
-    avatarMeta?.perkStats
-  ]);
+    
+    return buildStatDetails({}, 0);
+  }, [avatarMeta]);
 
   if (!isOpen) {
     return null;
@@ -64,7 +28,10 @@ export default function StatsDialog({ isOpen, onClose, avatarMeta }) {
       >
         <h3>Stats</h3>
         <div className="stats-dialog__body">
-          <StatsDetailList details={totalStats} />
+          <StatsDetailList 
+            details={totalStats} 
+            displayConfig={STATS_DISPLAY_CONFIG} 
+          />
         </div>
       </div>
     </div>

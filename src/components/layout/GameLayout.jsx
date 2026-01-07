@@ -2,24 +2,24 @@ import React from "react";
 import GameDialogs from "./GameDialogs.jsx";
 import { GameHud, GameOverlays } from "./GameLayoutParts.jsx";
 
-export default function GameLayout({
-  staminaCurrent,
-  staminaMax,
+function GameLayout({
+  resources = {},
+  resourceMaxValues = {}, // New prop received
   onToggleCharacter,
-  clickAreaProps,
-  bagProps,
-  contextMenuProps,
-  deleteDialogProps,
-  locationDialogProps,
-  mapDialogProps,
-  settingsDialogProps,
-  keybindsDialogProps,
-  statsDialogProps,
-  bloodlineDialogProps,
-  perksDialogProps,
-  characterPanelProps,
+  clickAreaProps = {},
+  bagProps = {},
+  contextMenuProps = {},
+  deleteDialogProps = {},
+  locationDialogProps = {},
+  mapDialogProps = {},
+  settingsDialogProps = {},
+  keybindsDialogProps = {},
+  statsDialogProps = {},
+  bloodlineDialogProps = {},
+  perksDialogProps = {},
+  characterPanelProps = {},
   tooltip,
-  lootNotices,
+  lootNotices = [],
   avatarIcon,
   avatarBg,
   avatarName,
@@ -32,6 +32,7 @@ export default function GameLayout({
     bgOffset: avatarMeta?.bgOffset,
     bgScale: avatarMeta?.bgScale ?? 1
   };
+  
   const mapDialogWithAvatar = {
     ...mapDialogProps,
     avatarIcon,
@@ -42,18 +43,22 @@ export default function GameLayout({
     avatarBgOffset: avatarFocus.bgOffset,
     avatarBgScale: avatarFocus.bgScale
   };
+
   const settingsDialogWithReset = {
     ...settingsDialogProps,
     onResetProgress
   };
+
   const statsDialogWithAvatar = {
     ...statsDialogProps,
     avatarMeta
   };
+
   const bloodlineDialogWithAvatar = {
     ...bloodlineDialogProps,
     avatarMeta
   };
+
   const perksDialogWithAvatar = {
     ...perksDialogProps,
     perks: avatarMeta?.perks ?? []
@@ -62,10 +67,10 @@ export default function GameLayout({
   return (
     <main className="main">
       <GameHud
-        staminaCurrent={staminaCurrent}
-        staminaMax={staminaMax}
+        resources={resources}
+        resourceMaxValues={resourceMaxValues} // Passing down to HUD
         onToggleCharacter={onToggleCharacter}
-        onOpenSettings={settingsDialogProps.onOpen}
+        onOpenSettings={settingsDialogProps?.onOpen}
         clickAreaProps={clickAreaProps}
         bagProps={bagProps}
         avatarIcon={avatarIcon}
@@ -76,6 +81,7 @@ export default function GameLayout({
         avatarBgOffset={avatarFocus.bgOffset}
         avatarBgScale={avatarFocus.bgScale}
       />
+      
       <GameDialogs
         contextMenuProps={contextMenuProps}
         deleteDialogProps={deleteDialogProps}
@@ -86,9 +92,15 @@ export default function GameLayout({
         statsDialogProps={statsDialogWithAvatar}
         bloodlineDialogProps={bloodlineDialogWithAvatar}
         perksDialogProps={perksDialogWithAvatar}
-        characterPanelProps={characterPanelProps}
+        characterPanelProps={{
+            ...characterPanelProps,
+            resources
+        }}
       />
+      
       <GameOverlays tooltip={tooltip} lootNotices={lootNotices} />
     </main>
   );
 }
+
+export default GameLayout;

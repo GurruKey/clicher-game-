@@ -7,6 +7,7 @@ from .race_view_level_actions import RaceViewLevelActionsMixin
 from .race_view_actions_race import RaceViewRaceActionMixin
 from .race_view_actions_tag import RaceViewTagActionMixin
 from .race_view_select import RaceViewSelectMixin
+from .race_view_variant_editor import RaceViewVariantEditorMixin
 
 
 class RaceView(
@@ -18,7 +19,8 @@ class RaceView(
     RaceViewLevelActionsMixin, 
     RaceViewRaceActionMixin,
     RaceViewTagActionMixin,
-    RaceViewSelectMixin
+    RaceViewSelectMixin,
+    RaceViewVariantEditorMixin
 ):
     def __init__(
         self,
@@ -45,6 +47,7 @@ class RaceView(
         self.init_data()
         self.init_actions()
         self.init_level_editor_actions()
+        self.init_variant_editor_actions()
         self.search_entry.bind("<KeyRelease>", self.on_filter_change)
         self.on_filter_change()
 

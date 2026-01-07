@@ -17,7 +17,8 @@ export default function CharacterPanel({
   hasBag,
   onBagDrop,
   onBagDragOver,
-  onBagDragStart
+  onBagDragStart,
+  resources
 }) {
   if (!isOpen) {
     return null;
@@ -42,6 +43,7 @@ export default function CharacterPanel({
         onBagDrop={onBagDrop}
         onBagDragOver={onBagDragOver}
         onBagDragStart={onBagDragStart}
+        resources={resources}
       />
     </aside>
   );

@@ -21,8 +21,13 @@ def build_level_editor_ui(view) -> None:
     )
     view.level_exit_button.pack(side="left", padx=(12, 0))
 
-    view.level_create_panel = tk.LabelFrame(view.variant_frame, text="Create Level")
-    view.level_edit_container = tk.Frame(view.detail_frame)
+    # --- Parent frames are now the hidden frames from RaceViewBase ---
+    # level_create_frame (replaces variants column)
+    # level_edit_frame (replaces detail column)
+    
+    view.level_create_panel = tk.LabelFrame(view.level_create_frame, text="Create Level")
+    
+    view.level_edit_container = tk.Frame(view.level_edit_frame)
     view.level_edit_container.columnconfigure(0, weight=1, uniform="level_edit")
     view.level_edit_container.columnconfigure(1, weight=1, uniform="level_edit")
     view.level_edit_container.rowconfigure(0, weight=1)

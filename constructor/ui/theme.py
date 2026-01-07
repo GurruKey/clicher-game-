@@ -9,6 +9,7 @@ BORDER_COLOR = "#2a2a2a"
 DIVIDER_COLOR = "#2a2a2a"
 TEXT_COLOR = "#e6e6e6"
 TEXT_MUTED = "#a0a0a0"
+TITLE_COLOR = "#ffffff"  # Added TITLE_COLOR
 ACCENT_COLOR = "#caa830"
 
 BUTTON_BG = "#1b1b1b"
@@ -177,3 +178,55 @@ def create_scrollbar(parent, orient: str, command):
         style=style,
         takefocus=0
     )
+
+
+class ScrollableFrame(tk.Frame):
+    def __init__(self, parent, auto_hide=True, min_width=260, **kwargs):
+        # We need a background color for the container frame too
+        bg = kwargs.get("bg", parent.cget("bg") if hasattr(parent, "cget") else BG_COLOR)
+        super().__init__(parent, bg=bg, **kwargs)
+        
+        self.auto_hide = auto_hide
+        self.min_width = min_width
+        
+        self.canvas = tk.Canvas(self, highlightthickness=0, bg=bg)
+        self.scrollbar = create_scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.inner_frame = tk.Frame(self.canvas, bg=bg)
+        
+        self.window_id = self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        self.inner_frame.bind("<Configure>", self._on_frame_configure)
+        self.canvas.bind("<Configure>", self._on_canvas_configure)
+        
+        self.canvas.pack(side="left", fill="both", expand=True)
+        # Scrollbar will be packed by _update_scroll_region if needed or if auto_hide is False
+
+    def _on_frame_configure(self, event=None):
+        self._update_scroll_region()
+
+    def _on_canvas_configure(self, event=None):
+        self._sync_width()
+        self._update_scroll_region()
+
+    def _sync_width(self):
+        # We don't want to sync width if it's during pre-layout (width=1)
+        # but the check_scroll logic in the original files handles this.
+        # Actually, setting it here is safe because it will be called again on proper layout.
+        width = max(self.canvas.winfo_width(), self.min_width)
+        self.canvas.itemconfig(self.window_id, width=width)
+
+    def _update_scroll_region(self, event=None):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        if self.auto_hide:
+            bbox = self.canvas.bbox("all")
+            if not bbox: return
+            content_height = bbox[3] - bbox[1]
+            visible_height = self.canvas.winfo_height()
+            
+            if visible_height > 1 and content_height > visible_height:
+                self.scrollbar.pack(side="right", fill="y")
+            else:
+                self.scrollbar.pack_forget()
+        else:
+            self.scrollbar.pack(side="right", fill="y")

@@ -1,3 +1,2 @@
-from .view import create_stats_info_view
-
-__all__ = ["create_stats_info_view"]
+from .info.view import create_stats_info_view
+from .display_order.view import create_stats_config_view

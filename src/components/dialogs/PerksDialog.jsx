@@ -1,33 +1,32 @@
 import React, { useMemo, useState } from "react";
 import StatsDetailList from "../stats/StatsDetailList.jsx";
 import StatsRowButton from "../stats/StatsRowButton.jsx";
-import { STATS } from "../../data/stats/index.js";
 
-export default function PerksDialog({ isOpen, onClose, perks }) {
+export default function PerksDialog({ isOpen, onClose, perks = [] }) {
+  const [openKey, setOpenKey] = useState(null);
+
+  const list = Array.isArray(perks) ? perks : [];
+
+  const perksWithDetails = useMemo(() => {
+    return list.map((perk, index) => {
+      const stats = perk.stats || {};
+      const details = Object.entries(stats).map(([id, value]) => ({
+        id,
+        label: id.charAt(0).toUpperCase() + id.slice(1), // Basic label fallback
+        value: String(value)
+      }));
+      
+      return {
+        ...perk,
+        key: `${perk.id}-${index}`,
+        details
+      };
+    });
+  }, [list]);
+
   if (!isOpen) {
     return null;
   }
-
-  const list = Array.isArray(perks) ? perks : [];
-  const [openKey, setOpenKey] = useState(null);
-  const detailsMap = useMemo(() => {
-    const map = new Map();
-    list.forEach((perk, index) => {
-      const key = `${perk.sourceType}-${perk.sourceName}-${perk.id}-${index}`;
-      if (!perk.stats) {
-        map.set(key, []);
-        return;
-      }
-      const details = STATS.filter((stat) => perk.stats[stat.id] != null).map(
-        (stat) => ({
-          label: stat.label,
-          value: String(perk.stats[stat.id])
-        })
-      );
-      map.set(key, details);
-    });
-    return map;
-  }, [list]);
 
   return (
     <div className="dialog-backdrop" onClick={onClose} role="presentation">
@@ -40,36 +39,32 @@ export default function PerksDialog({ isOpen, onClose, perks }) {
       >
         <h3>Perks</h3>
         <div className="stats-dialog__body">
-          {list.length === 0 ? (
+          {perksWithDetails.length === 0 ? (
             <div className="stats-dialog__row">
               <span className="stats-dialog__label">No perks yet</span>
             </div>
           ) : (
-            list.map((perk, index) => {
-              const key = `${perk.sourceType}-${perk.sourceName}-${perk.id}-${index}`;
-              const details = detailsMap.get(key) ?? [];
-              const hasDetails = details.length > 0;
+            perksWithDetails.map((perk) => {
+              const hasDetails = perk.details.length > 0;
+              const isExpanded = openKey === perk.key;
+
               return (
-                <div key={key}>
+                <div key={perk.key}>
                   {hasDetails ? (
                     <StatsRowButton
-                      label={`${perk.sourceType}: ${perk.sourceName}`}
-                      value={perk.name}
-                      onClick={() =>
-                        setOpenKey((prev) => (prev === key ? null : key))
-                      }
+                      label={perk.name}
+                      value={isExpanded ? "▲" : "▼"}
+                      onClick={() => setOpenKey(isExpanded ? null : perk.key)}
                     />
                   ) : (
                     <div className="stats-dialog__row">
-                      <span className="stats-dialog__label">
-                        {perk.sourceType}: {perk.sourceName}
-                      </span>
-                      <span className="stats-dialog__value">{perk.name}</span>
+                      <span className="stats-dialog__label">{perk.name}</span>
+                      <span className="stats-dialog__value">Active</span>
                     </div>
                   )}
-                  {hasDetails && openKey === key ? (
-                    <StatsDetailList details={details} />
-                  ) : null}
+                  {hasDetails && isExpanded && (
+                    <StatsDetailList details={perk.details} />
+                  )}
                 </div>
               );
             })

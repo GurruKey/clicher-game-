@@ -5,8 +5,9 @@ import { AVATARS, DEFAULT_AVATAR_ID } from "./data/avatars/index.js";
 import { getRaceById } from "./data/race_variants/races/index.js";
 import { getFactionByName, getFactionStats } from "./data/factions/index.js";
 import { getOriginByName, getOriginStats } from "./data/origins/index.js";
-import { getStatValueFromDetails } from "./data/stats/index.js";
 import { getPerkById } from "./data/perks/index.js";
+import { STATS } from "./data/stats/index.js";
+import { calculateFinalValues, aggregateBaseValues } from "./utils/calcEngine.js";
 import {
   getRaceVariantById,
   getRaceVariantStats
@@ -35,6 +36,7 @@ export default function App() {
     () => AVATARS.find((avatar) => avatar.id === selectedAvatarId) ?? AVATARS[0],
     [selectedAvatarId]
   );
+  
   const selectedAvatarMeta = useMemo(() => {
     if (!selectedAvatar) {
       return null;
@@ -103,6 +105,16 @@ export default function App() {
     if (factionSource) {
       addPerks("Faction", factionSource.name, factionSource.perks);
     }
+    
+    // Calculate Final Stats
+    const baseStats = aggregateBaseValues([
+        raceStats,
+        originStats,
+        factionStats,
+        perkStats
+    ]);
+    const finalStats = calculateFinalValues(STATS, baseStats);
+    
     return {
       ...selectedAvatar,
       race: raceSource?.name ?? fallbackRaceName,
@@ -114,67 +126,22 @@ export default function App() {
       factionStats: factionStats ?? selectedAvatar.factionStats,
       originStats: originStats ?? selectedAvatar.originStats,
       perks,
-      perkStats
+      perkStats,
+      finalStats
     };
   }, [selectedAvatar]);
-  const staminaBonus = useMemo(() => {
-    if (!selectedAvatarMeta) {
-      return 0;
-    }
-    const hasStaminaPerk = selectedAvatarMeta.perks?.some(
-      (perk) => perk.id === "stamina"
-    );
-    if (!hasStaminaPerk) {
-      return 0;
-    }
-    const raceAgility = getStatValueFromDetails(
-      selectedAvatarMeta.raceStats,
-      "agility",
-      0
-    );
-    const originAgility = getStatValueFromDetails(
-      selectedAvatarMeta.originStats,
-      "agility",
-      0
-    );
-    const factionAgility = getStatValueFromDetails(
-      selectedAvatarMeta.factionStats,
-      "agility",
-      0
-    );
-    const raceStamina = getStatValueFromDetails(
-      selectedAvatarMeta.raceStats,
-      "stamina",
-      0
-    );
-    const originStamina = getStatValueFromDetails(
-      selectedAvatarMeta.originStats,
-      "stamina",
-      0
-    );
-    const factionStamina = getStatValueFromDetails(
-      selectedAvatarMeta.factionStats,
-      "stamina",
-      0
-    );
-    const perkStamina =
-      selectedAvatarMeta.perkStats?.stamina ?? 0;
-    return (
-      raceAgility +
-      originAgility +
-      factionAgility +
-      raceStamina +
-      originStamina +
-      factionStamina +
-      perkStamina
-    );
-  }, [selectedAvatarMeta]);
+
   const staminaEnabled = useMemo(() => {
     if (!selectedAvatarMeta) {
       return false;
     }
     return selectedAvatarMeta.perks?.some((perk) => perk.id === "stamina");
   }, [selectedAvatarMeta]);
+
+  const staminaBonus = useMemo(() => {
+    if (!staminaEnabled) return 0;
+    return selectedAvatarMeta?.finalStats?.max_stamina ?? 0;
+  }, [selectedAvatarMeta, staminaEnabled]);
 
   const handleEnter = () => {
     const avatarId = selectedAvatar?.id ?? DEFAULT_AVATAR_ID;

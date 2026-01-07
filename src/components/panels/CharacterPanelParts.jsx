@@ -2,6 +2,7 @@ import React from "react";
 import useCharacterSlots from "../../hooks/character/useCharacterSlots.js";
 
 export function CharacterSlotColumn({ slots, side }) {
+  if (!slots) return null;
   return (
     <div className={`character-column character-column--${side}`}>
       {slots.map((slot) => (
@@ -23,27 +24,9 @@ export function CharacterStatsPanel({
       <div className="character-stats__title">Stats</div>
       <div className="character-stats__body" />
       <div className="character-stats-actions">
-        <button
-          className="character-stats-more"
-          type="button"
-          onClick={onOpenPerks}
-        >
-          Perks
-        </button>
-        <button
-          className="character-stats-more"
-          type="button"
-          onClick={onOpenDetails}
-        >
-          Stats
-        </button>
-        <button
-          className="character-stats-more"
-          type="button"
-          onClick={onOpenBloodline}
-        >
-          Bloodline
-        </button>
+        <button className="character-stats-more" type="button" onClick={onOpenPerks}>Perks</button>
+        <button className="character-stats-more" type="button" onClick={onOpenDetails}>Stats</button>
+        <button className="character-stats-more" type="button" onClick={onOpenBloodline}>Bloodline</button>
       </div>
     </div>
   );
@@ -54,13 +37,10 @@ export function CharacterWeaponBar({
   isOuterLayer,
   onToggleLayer
 }) {
+  if (!weaponSlots) return null;
   return (
     <div className="character-weapon-row">
-      <button
-        className="character-layer-toggle"
-        type="button"
-        onClick={onToggleLayer}
-      >
+      <button className="character-layer-toggle" type="button" onClick={onToggleLayer}>
         {isOuterLayer ? "Outer" : "Inner"}
       </button>
       <div className="character-weapon-bar">
@@ -94,11 +74,7 @@ export function CharacterBagSlot({
       onDragStart={hasBag ? onBagDragStart : undefined}
       onDragOver={onBagDragOver}
       onDrop={onBagDrop}
-      onMouseEnter={
-        hasBag && onTooltipShow
-          ? (event) => onTooltipShow(event, bagName, bagRarity)
-          : undefined
-      }
+      onMouseEnter={hasBag && onTooltipShow ? (e) => onTooltipShow(e, bagName, bagRarity) : undefined}
       onMouseMove={hasBag ? onTooltipMove : undefined}
       onMouseLeave={hasBag ? onTooltipHide : undefined}
     >
@@ -124,8 +100,7 @@ export function CharacterPanelContent({
   onBagDragOver,
   onBagDragStart
 }) {
-  const { isOuterLayer, leftSlots, rightSlots, weaponSlots } =
-    useCharacterSlots({ gearLayer });
+  const { isOuterLayer, leftSlots, rightSlots, weaponSlots } = useCharacterSlots({ gearLayer });
 
   return (
     <div className="character-panel__body">
@@ -140,12 +115,14 @@ export function CharacterPanelContent({
         </div>
         <CharacterSlotColumn slots={rightSlots} side="right" />
       </div>
+      
       <CharacterWeaponBar
         weaponSlots={weaponSlots}
         isOuterLayer={isOuterLayer}
         onToggleLayer={onToggleLayer}
       />
-      {isOuterLayer ? (
+
+      {isOuterLayer && (
         <CharacterBagSlot
           hasBag={hasBag}
           bagIcon={bagIcon}
@@ -158,7 +135,7 @@ export function CharacterPanelContent({
           onTooltipMove={onTooltipMove}
           onTooltipHide={onTooltipHide}
         />
-      ) : null}
+      )}
     </div>
   );
 }

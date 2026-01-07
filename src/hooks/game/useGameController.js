@@ -1,15 +1,15 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CURRENCIES } from "../../data/currencies/index.js";
 import {
   DEFAULT_LOCATION_ID,
   LOCATIONS
 } from "../../data/locations/index.js";
-import {
-  STAMINA_COST,
-  STAMINA_MAX,
-  STAMINA_REGEN_INTERVAL_MS
-} from "../../config/stamina.js";
+import * as ALL_RESOURCES_DATA from "../../data/resources/index.js";
+import { calculateFinalResources } from "../../data/resources/engine.js";
+import { getPerkById } from "../../data/perks/index.js";
 import { WORK_DURATION_MS } from "../../config/work.js";
+import { aggregateBaseValues, calculateFinalValues } from "../../utils/calcEngine.js";
+import { STATS } from "../../data/stats/index.js";
 import useGameInventorySetup from "./useGameInventorySetup.js";
 import {
   useCharacterDialog,
@@ -24,13 +24,13 @@ import {
 import useLootNotices from "../loot/useLootNotices.js";
 import useLootEngine from "../loot/useLootEngine.js";
 import useLootRewards from "../loot/useLootRewards.js";
-import useStamina from "../resources/useStamina.js";
+import useResources from "../resources/useResources.js";
 import useRarityTheme from "../ui/useRarityTheme.js";
 import { loadGameSave, saveGameSave } from "../../utils/gameStorage.js";
 import useKeybinds from "../input/useKeybinds.js";
 
 function useCurrentLocation() {
-  return LOCATIONS[DEFAULT_LOCATION_ID];
+  return LOCATIONS[DEFAULT_LOCATION_ID] || Object.values(LOCATIONS)[0];
 }
 
 function useGameDialogsState() {
@@ -61,7 +61,8 @@ function useGameDialogSetup({
   locationItems,
   navigation,
   keybinds,
-  onUpdateKeybind
+  onUpdateKeybind,
+  playerPerksResolved
 }) {
   const locationDialogProps = {
     isOpen: dialogs.locationDialog.isOpen,
@@ -103,7 +104,8 @@ function useGameDialogSetup({
   };
   const perksDialogProps = {
     isOpen: dialogs.perksDialog.isOpen,
-    onClose: dialogs.perksDialog.close
+    onClose: dialogs.perksDialog.close,
+    perks: playerPerksResolved
   };
 
   return {
@@ -150,33 +152,34 @@ function useGameOverlaySetup({ inventoryFlow, lootNotices }) {
 function useGameLootFlow({
   location,
   currencies,
-  staminaMax,
-  staminaRegenMs,
-  staminaCost,
   durationMs,
   addNotice,
   placeItemInVisibleSlots,
   onLocationClick,
   squeezeLeft,
   squeezeRight,
-  initialStamina,
-  initialDrops
+  initialResources,
+  initialDrops,
+  playerPerks,
+  calculatedMaxResources
 }) {
-  const { stamina, consumeStamina } = useStamina({
-    max: staminaMax,
-    regenIntervalMs: staminaRegenMs,
-    initialStamina
-  });
+  const { resources, consumeResource, addResource } = useResources(
+    ALL_RESOURCES_DATA.RESOURCES || [], 
+    playerPerks,
+    initialResources,
+    calculatedMaxResources
+  );
+
   const { locationItems, handleLoot, locationDrops } = useLootRewards({
     currencies,
     addNotice,
     placeItemInVisibleSlots,
     initialDrops
   });
+
   const { isWorking, progress, remainingSeconds, handleClick } = useLootEngine({
     location,
-    consumeStamina,
-    staminaCost,
+    consumeResource,
     durationMs,
     onLoot: handleLoot
   });
@@ -195,7 +198,7 @@ function useGameLootFlow({
   };
 
   return {
-    staminaCurrent: stamina,
+    resources,
     clickAreaProps,
     locationItems,
     locationDrops
@@ -208,38 +211,60 @@ function useGameLootSetup({
   addNotice,
   inventoryFlow,
   navigation,
-  initialStamina,
+  initialResources,
   initialDrops,
-  staminaMax
+  playerPerks,
+  calculatedMaxResources
 }) {
   const lootFlow = useGameLootFlow({
     location,
     currencies: CURRENCIES,
-    staminaMax,
-    staminaRegenMs: STAMINA_REGEN_INTERVAL_MS,
-    staminaCost: STAMINA_COST,
     durationMs: WORK_DURATION_MS,
     addNotice,
     placeItemInVisibleSlots: inventoryFlow.placeItemInVisibleSlots,
     onLocationClick: navigation.handleOpenLocation,
     squeezeLeft: dialogs.characterDialog.isOpen,
     squeezeRight: inventoryFlow.isBagOpen,
-    initialStamina,
-    initialDrops
+    initialResources,
+    initialDrops,
+    playerPerks,
+    calculatedMaxResources
   });
 
   return {
-    ...lootFlow,
-    staminaMax
+    ...lootFlow
   };
 }
 
-function useGameFlows({ initialSave, staminaBonus, staminaEnabled }) {
+function useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks = [] }) {
   const location = useCurrentLocation();
   const { keybinds, updateKeybind } = useKeybinds();
-  const staminaMax = staminaEnabled
-    ? STAMINA_MAX + Math.max(0, staminaBonus ?? 0)
-    : 0;
+  
+  const [playerPerks, setPlayerPerks] = useState(() => {
+      if (initialSave?.perks && initialSave.perks.length > 0) {
+          return initialSave.perks;
+      }
+      return avatarPerks.map(p => p.id);
+  });
+
+  const playerPerksResolved = useMemo(() => {
+    return playerPerks.map(id => getPerkById(id)).filter(Boolean);
+  }, [playerPerks]);
+
+  // 1. Calculate Final Stats
+  const calculatedStats = useMemo(() => {
+    const baseValues = aggregateBaseValues(playerPerksResolved.map(p => p.stats));
+    return calculateFinalValues(STATS, baseValues);
+  }, [playerPerksResolved]);
+
+  // 2. Calculate Final Resources (based on stats)
+  const calculatedMaxResources = useMemo(() => {
+    const overrideBases = {};
+    if (staminaBonus) overrideBases["max_stamina"] = staminaBonus;
+    return calculateFinalResources(calculatedStats, overrideBases);
+  }, [calculatedStats, staminaBonus]);
+
+  const staminaMax = calculatedMaxResources["max_stamina"] || 0;
 
   useRarityTheme();
 
@@ -264,9 +289,10 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled }) {
     addNotice,
     inventoryFlow,
     navigation,
-    initialStamina: initialSave?.stamina?.current ?? initialSave?.energy?.current,
+    initialResources: initialSave?.resources ?? null,
     initialDrops: initialSave?.loot ?? null,
-    staminaMax
+    playerPerks,
+    calculatedMaxResources
   });
 
   const dialogProps = useGameDialogSetup({
@@ -275,7 +301,8 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled }) {
     locationItems: lootFlow.locationItems,
     navigation,
     keybinds,
-    onUpdateKeybind: updateKeybind
+    onUpdateKeybind: updateKeybind,
+    playerPerksResolved
   });
 
   const overlayProps = useGameOverlaySetup({ inventoryFlow, lootNotices });
@@ -286,16 +313,21 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled }) {
     lootFlow,
     dialogProps,
     overlayProps,
-    staminaMax: lootFlow.staminaMax,
+    staminaMax,
     dialogs,
-    keybinds
+    keybinds,
+    playerPerks,
+    setPlayerPerks,
+    calculatedStats,
+    calculatedMaxResources
   };
 }
 
 export default function useGameController({
   onResetProgress,
   staminaBonus = 0,
-  staminaEnabled = true
+  staminaEnabled = true,
+  avatarPerks = []
 } = {}) {
   const initialSave = useMemo(() => loadGameSave(), []);
   const {
@@ -306,8 +338,12 @@ export default function useGameController({
     overlayProps,
     staminaMax,
     dialogs,
-    keybinds
-  } = useGameFlows({ initialSave, staminaBonus, staminaEnabled });
+    keybinds,
+    playerPerks,
+    calculatedStats,
+    calculatedMaxResources
+  } = useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks });
+  
   const handleBagToggle = inventoryFlow.bagProps?.onBagToggle;
   const handleMapOpen = inventoryFlow.bagProps?.onMapOpen;
 
@@ -315,12 +351,8 @@ export default function useGameController({
     const handleKey = (event) => {
       const target = event.target;
       const tag = target?.tagName?.toLowerCase();
-      if (tag === "input" || tag === "textarea" || target?.isContentEditable) {
-        return;
-      }
-      if (dialogs.keybindsDialog.isOpen) {
-        return;
-      }
+      if (tag === "input" || tag === "textarea" || target?.isContentEditable) return;
+      if (dialogs.keybindsDialog.isOpen) return;
       if (event.code === keybinds.resetProgress && onResetProgress) {
         event.preventDefault();
         onResetProgress();
@@ -328,13 +360,9 @@ export default function useGameController({
       }
       if (event.code === keybinds.openMap) {
         event.preventDefault();
-        if (dialogs.mapDialog.isOpen) {
-          dialogs.mapDialog.close();
-        } else if (handleMapOpen) {
-          handleMapOpen();
-        } else {
-          dialogs.mapDialog.open();
-        }
+        if (dialogs.mapDialog.isOpen) dialogs.mapDialog.close();
+        else if (handleMapOpen) handleMapOpen();
+        else dialogs.mapDialog.open();
         return;
       }
       if (event.code === keybinds.toggleBag && handleBagToggle) {
@@ -345,28 +373,23 @@ export default function useGameController({
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [
-    dialogs.keybindsDialog.isOpen,
-    dialogs.mapDialog,
-    handleBagToggle,
-    handleMapOpen,
-    keybinds.openMap,
-    keybinds.resetProgress,
-    keybinds.toggleBag,
-    onResetProgress
-  ]);
+  }, [dialogs, handleBagToggle, handleMapOpen, keybinds, onResetProgress]);
 
   useEffect(() => {
     saveGameSave({
       inventory: inventoryFlow.inventorySnapshot,
-      stamina: { current: lootFlow.staminaCurrent },
-      loot: lootFlow.locationDrops
+      resources: lootFlow.resources,
+      loot: lootFlow.locationDrops,
+      perks: playerPerks
     });
-  }, [inventoryFlow.inventorySnapshot, lootFlow.staminaCurrent, lootFlow.locationDrops]);
+  }, [inventoryFlow.inventorySnapshot, lootFlow.resources, lootFlow.locationDrops, playerPerks]);
 
   return {
-    staminaCurrent: lootFlow.staminaCurrent,
-    staminaMax,
+    resources: lootFlow.resources || {},
+    calculatedStats,
+    calculatedMaxResources,
+    staminaCurrent: lootFlow.resources?.["max_stamina"] || 0,
+    staminaMax: staminaMax || 0,
     onToggleCharacter: navigation.handleToggleCharacter,
     clickAreaProps: lootFlow.clickAreaProps,
     bagProps: inventoryFlow.bagProps,
@@ -380,6 +403,7 @@ export default function useGameController({
     bloodlineDialogProps: dialogProps.bloodlineDialogProps,
     perksDialogProps: dialogProps.perksDialogProps,
     characterPanelProps: inventoryFlow.characterPanelProps,
-    ...overlayProps
+    tooltip: overlayProps.tooltip,
+    lootNotices: overlayProps.lootNotices
   };
 }

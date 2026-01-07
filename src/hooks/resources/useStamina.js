@@ -13,6 +13,8 @@ export default function useStamina({ max, regenIntervalMs, initialStamina }) {
   }, [max]);
 
   useEffect(() => {
+    if (!regenIntervalMs || regenIntervalMs <= 0) return;
+
     const regenId = setInterval(() => {
       setStamina((prev) => Math.min(max, prev + 1));
     }, regenIntervalMs);

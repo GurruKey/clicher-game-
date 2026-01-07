@@ -7,8 +7,8 @@ import { SettingsButton } from "../ui/UiButtons.jsx";
 import Tooltip from "../ui/Tooltip.jsx";
 
 export function GameHud({
-  staminaCurrent,
-  staminaMax,
+  resources,
+  resourceMaxValues, // New prop passed through
   onToggleCharacter,
   onOpenSettings,
   clickAreaProps,
@@ -26,8 +26,8 @@ export function GameHud({
       <SettingsButton onClick={onOpenSettings} />
       <AvatarBadge
         onOpen={onToggleCharacter}
-        staminaCurrent={staminaCurrent}
-        staminaMax={staminaMax}
+        resources={resources}
+        resourceMaxValues={resourceMaxValues}
         avatarIcon={avatarIcon}
         avatarBg={avatarBg}
         avatarName={avatarName}

@@ -1,66 +1,61 @@
-import { useRef } from "react";
-import useClickWork from "../work/useClickWork.js";
-import { pickLootByChance, sumLootChance } from "../../utils/loot.js";
+import { useEffect, useRef, useState } from "react";
 
 export default function useLootEngine({
   location,
-  consumeStamina,
-  staminaCost,
+  consumeResource,
   durationMs,
   onLoot
 }) {
-  const lootWarningRef = useRef(new Set());
-  const { isWorking, progress, remainingSeconds, startWork } = useClickWork({
-    durationMs,
-    onComplete: () => {
-      const lootTable = location?.lootTable ?? [];
-      if (lootTable.length === 0) {
-        return;
-      }
-      const totalChance = sumLootChance(lootTable);
-      if (totalChance <= 0) {
-        return;
-      }
+  const [isWorking, setIsWorking] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const startTimeRef = useRef(0);
+  const timerRef = useRef(null);
 
-      if (
-        location?.id &&
-        totalChance !== 100 &&
-        !lootWarningRef.current.has(location.id)
-      ) {
-        lootWarningRef.current.add(location.id);
-        console.warn(
-          `Loot chances for ${location.id} sum to ${totalChance}. ` +
-            "To keep exact percentages, make it 100."
-        );
-      }
+  const resourceId = location?.requiredResourceId || "max_stamina";
+  const resourceCost = location?.resourceCost ?? 1;
 
-      const lootId = pickLootByChance(lootTable);
-      if (!lootId) {
-        return;
-      }
-
-      if (onLoot) {
-        onLoot(lootId);
-      }
-    }
-  });
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) cancelAnimationFrame(timerRef.current);
+    };
+  }, []);
 
   const handleClick = () => {
-    if (isWorking) {
+    if (isWorking) return;
+
+    if (!consumeResource(resourceId, resourceCost)) {
       return;
     }
 
-    if (!consumeStamina(staminaCost)) {
-      return;
-    }
+    setIsWorking(true);
+    setProgress(0);
+    startTimeRef.current = performance.now();
 
-    startWork();
+    const update = (now) => {
+      const elapsed = now - startTimeRef.current;
+      const p = Math.min(1, elapsed / durationMs); // Progress as 0...1
+      setProgress(p);
+
+      if (p < 1) {
+        timerRef.current = requestAnimationFrame(update);
+      } else {
+        setIsWorking(false);
+        setProgress(0);
+        if (onLoot) onLoot();
+      }
+    };
+
+    timerRef.current = requestAnimationFrame(update);
   };
+
+  const remainingMs = isWorking
+    ? Math.max(0, durationMs - progress * durationMs)
+    : durationMs;
 
   return {
     isWorking,
     progress,
-    remainingSeconds,
+    remainingSeconds: remainingMs / 1000,
     handleClick
   };
 }
