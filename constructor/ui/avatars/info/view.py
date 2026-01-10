@@ -13,7 +13,7 @@ from ...theme import (
 )
 
 from constants import TOOLTIP_BG, TOOLTIP_BORDER, SLOT_BG, SLOT_BORDER
-from ...ui_common import draw_rounded_rect
+from ...common import draw_rounded_rect, StandardLeftList
 from ..common import build_layer
 
 
@@ -25,8 +25,8 @@ def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
     paned = ModernPanedWindow(container, horizontal=True)
     paned.pack(fill="both", expand=True)
 
-    list_frame = tk.Frame(paned)
-    paned.add(list_frame, minsize=280)
+    list_view = StandardLeftList(paned)
+    paned.add(list_view, minsize=280)
 
     detail_frame = tk.Frame(paned)
     paned.add(detail_frame, minsize=400)
@@ -59,7 +59,7 @@ def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
     detail_text = tk.Label(detail_frame, text="", justify="left", anchor="nw")
     detail_text.pack(anchor="nw")
 
-    search_row = tk.Frame(list_frame)
+    search_row = tk.Frame(list_view.top_frame)
     search_row.pack(fill="x", pady=(0, 8))
 
     search_label = tk.Label(search_row, text="Search")
@@ -69,11 +69,7 @@ def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
     search_entry = tk.Entry(search_row, textvariable=search_var, width=22)
     search_entry.pack(side="left", padx=(8, 0))
 
-    # Avatar List using ScrollableFrame
-    scroll_view = ScrollableFrame(list_frame, auto_hide=True, min_width=260)
-    scroll_view.pack(side="left", fill="both", expand=True)
-    inner = scroll_view.inner_frame
-    canvas = scroll_view.canvas
+    inner = list_view.inner
 
     view_images: list[tk.PhotoImage] = []
     preview_images: list[tk.PhotoImage] = []
@@ -282,18 +278,7 @@ def create_avatars_view(parent: tk.Frame, avatars: list[dict]) -> None:
         row_entries.clear()
 
         for avatar in filtered:
-            row = tk.Frame(
-                inner,
-                bg=row_bg,
-                highlightthickness=1,
-                highlightbackground=row_border,
-                highlightcolor=row_border
-            )
-            row.pack(fill="x", pady=5)
-
-            row_inner = tk.Frame(row, bg=row_bg)
-            row_inner.pack(fill="x", padx=8, pady=6)
-
+            row, row_inner = list_view.create_row_frame(bg=row_bg, border=row_border)
             row_widgets: list[tk.Widget] = [row, row_inner]
 
             icon_canvas = tk.Canvas(

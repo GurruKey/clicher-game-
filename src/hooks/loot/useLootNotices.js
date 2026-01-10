@@ -81,8 +81,12 @@ export default function useLootNotices({
 
   const addNotice = useCallback(
     (notice) => {
+      const noticeWithUniqueId = {
+        ...notice,
+        id: notice.id || `${Date.now()}-${Math.random()}`
+      };
       setLootNotices((prev) => {
-        const next = [notice, ...prev];
+        const next = [noticeWithUniqueId, ...prev];
         if (next.length <= max) {
           return next;
         }
@@ -94,7 +98,7 @@ export default function useLootNotices({
         });
         return trimmed;
       });
-      scheduleNotice(notice);
+      scheduleNotice(noticeWithUniqueId);
     },
     [max, scheduleNotice, clearNotice]
   );

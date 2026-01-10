@@ -11,6 +11,7 @@ export default function CharacterPanel({
   onTooltipShow,
   onTooltipMove,
   onTooltipHide,
+  onContextMenu,
   bagRarity,
   bagIcon,
   bagName,
@@ -18,6 +19,10 @@ export default function CharacterPanel({
   onBagDrop,
   onBagDragOver,
   onBagDragStart,
+  onEquipmentDrop,
+  onEquipmentDragStart,
+  equippedItems,
+  currencies,
   resources
 }) {
   if (!isOpen) {
@@ -36,6 +41,7 @@ export default function CharacterPanel({
         onTooltipShow={onTooltipShow}
         onTooltipMove={onTooltipMove}
         onTooltipHide={onTooltipHide}
+        onContextMenu={onContextMenu}
         bagRarity={bagRarity}
         bagIcon={bagIcon}
         bagName={bagName}
@@ -43,6 +49,10 @@ export default function CharacterPanel({
         onBagDrop={onBagDrop}
         onBagDragOver={onBagDragOver}
         onBagDragStart={onBagDragStart}
+        onEquipmentDrop={onEquipmentDrop}
+        onEquipmentDragStart={onEquipmentDragStart}
+        equippedItems={equippedItems}
+        currencies={currencies}
         resources={resources}
       />
     </aside>

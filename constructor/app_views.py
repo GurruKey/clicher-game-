@@ -4,10 +4,11 @@ import tkinter as tk
 
 from constants import DEFAULT_RARITY_COLORS
 from game_io.avatars import parse_avatars
-from game_io.items import parse_bag_capacities, parse_currencies
+from game_io.items import parse_bag_capacities, parse_currencies, save_item, delete_item
 from game_io.locations import parse_location_catalog, parse_locations, save_location
 from game_io.perks import parse_perks, save_perk, delete_perk
 from game_io.rarities import load_rarity_colors, parse_rarities
+from game_io.types import parse_types
 from game_io.stats import parse_stats, save_stat, delete_stat
 from game_io.resources import parse_resources, save_resource, delete_resource
 from game_io.stats_config import parse_stats_config, save_stats_config
@@ -18,12 +19,12 @@ from ui.stats_perks_bloodline.bloodline import create_bloodline_race_view, creat
 from ui.stats_perks_bloodline.perks import create_perks_info_view
 from ui.stats_perks_bloodline.stats import create_stats_info_view, create_stats_config_view
 from ui.stats_perks_bloodline.resources import create_resources_info_view
-from ui.ui_help import create_help_view
-from ui.ui_items import create_items_view
-from ui.ui_locations import create_locations_view
-from ui.ui_map import create_map_view
-# UPDATED: Import from new location
-from ui.rarities import create_rarities_view
+from ui.help import create_help_view
+from ui.items import create_items_view
+from ui.items.editor import create_item_editor_view
+from ui.items.presets import create_rarities_view, create_types_view
+from ui.locations import create_locations_view
+from ui.map import create_map_view
 from ui.dialogs import DeleteConflictDialog, ReassignDialog, RenameDialog
 
 from app_context import AppData, AppPaths
@@ -52,7 +53,46 @@ class ViewBuilders:
 
     def build_items_view(self, f):
         items = parse_currencies(self.paths.currencies_path) if self.paths.currencies_path.exists() else []
-        create_items_view(f, items, parse_locations(self.paths.locations_root), load_rarity_colors(self.paths.rarities_root) or DEFAULT_RARITY_COLORS, parse_bag_capacities(self.paths.bags_path))
+        
+        def on_edit(item):
+            if self.show_view_callback:
+                self.show_view_callback("items_editor", lambda frame: self.build_item_editor_view(frame, item), True)
+        
+        create_items_view(f, items, parse_locations(self.paths.locations_root), load_rarity_colors(self.paths.rarities_root) or DEFAULT_RARITY_COLORS, parse_bag_capacities(self.paths.bags_path), on_edit=on_edit)
+
+    def build_item_editor_view(self, f, item_to_edit=None):
+        rarity_colors = load_rarity_colors(self.paths.rarities_root) or DEFAULT_RARITY_COLORS
+        available_types = parse_types(self.paths.types_root)
+        
+        # Get all existing items to find unique maxStack values and names for validation
+        items = parse_currencies(self.paths.currencies_path) if self.paths.currencies_path.exists() else []
+        available_max_stacks = sorted(list(set(it.get("maxStack", 1) for it in items)))
+        existing_names = [it["name"] for it in items]
+        existing_ids = [it["id"] for it in items]
+        existing_categories = sorted(list(set(it.get("categoryId", "") for it in items if it.get("categoryId"))))
+        
+        def on_save(data):
+            save_item(self.paths.currencies_path, data)
+            if self.show_view_callback: self.show_view_callback("items", self.build_items_view, True)
+        
+        def on_cancel():
+            if self.show_view_callback: self.show_view_callback("items", self.build_items_view)
+            
+        def on_delete(item_id):
+            if messagebox.askyesno("Confirm", f"Delete item {item_id}?"):
+                delete_item(self.paths.currencies_path, item_id)
+                if self.show_view_callback: self.show_view_callback("items", self.build_items_view, True)
+                return True
+            return False
+
+        create_item_editor_view(
+            f, item_to_edit, rarity_colors, available_types, available_max_stacks, on_save, on_cancel, on_delete,
+            assets_root=self.paths.item_assets_root,
+            currencies_root=self.paths.currencies_path,
+            existing_names=existing_names,
+            existing_categories=existing_categories,
+            existing_ids=existing_ids
+        )
 
     def build_avatars_view(self, f): create_avatars_view(f, self.get_avatars())
 
@@ -62,6 +102,10 @@ class ViewBuilders:
     def build_rarities_view(self, f):
         r = parse_rarities(self.paths.rarities_root) or [{"id": k, "label": k.title(), "color": v} for k, v in DEFAULT_RARITY_COLORS.items()]
         create_rarities_view(f, self.paths.rarities_root, r)
+
+    def build_types_view(self, f):
+        t = parse_types(self.paths.types_root)
+        create_types_view(f, self.paths.types_root, t)
 
     def build_locations_view(self, f):
         def r(): return parse_location_catalog(self.paths.locations_root)

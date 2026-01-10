@@ -1,27 +1,21 @@
 import { CURRENCIES } from "./currencies/index.js";
-
-const BAG_DEFINITIONS = {
-  peasant_bag: {
-    id: "peasant_bag",
-    itemId: "peasant_bag",
-    capacity: 5
-  }
-};
-
-const buildBagEntry = (definition) => {
-  const item = CURRENCIES[definition.itemId];
-  return {
-    ...definition,
-    name: item?.name ?? definition.id,
-    icon: item?.icon
-  };
-};
+import { ITEM_TYPES } from "./items/presets/types/index.js";
 
 export const BAGS = Object.fromEntries(
-  Object.values(BAG_DEFINITIONS).map((definition) => [
-    definition.id,
-    buildBagEntry(definition)
-  ])
+  Object.values(CURRENCIES)
+    .filter(item => {
+      const types = item.types || (Array.isArray(item.type) ? item.type : [item.type]);
+      return types.some(t => t === "bag" || ITEM_TYPES[t]?.is_bag);
+    })
+    .map(item => [
+      item.id,
+      {
+        id: item.id,
+        itemId: item.id,
+        capacity: item.capacity || 0,
+        name: item.name,
+        icon: item.icon
+      }
+    ])
 );
 
-export const DEFAULT_BAG_ID = "peasant_bag";

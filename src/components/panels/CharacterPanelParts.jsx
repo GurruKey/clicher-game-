@@ -1,14 +1,98 @@
 import React from "react";
 import useCharacterSlots from "../../hooks/character/useCharacterSlots.js";
 
-export function CharacterSlotColumn({ slots, side }) {
+export function CharacterSlot({
+  slot,
+  equippedItem,
+  currencies,
+  onDrop,
+  onContextMenu,
+  onDragStart,
+  onTooltipShow,
+  onTooltipMove,
+  onTooltipHide
+}) {
+  const itemData = equippedItem ? currencies[equippedItem.id] : null;
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    onDrop(slot.id);
+  };
+
+  const handleDragStart = (e) => {
+    if (itemData && onDragStart) {
+      onDragStart(e, equippedItem.id, slot.id, equippedItem.instanceId);
+    }
+  };
+
+  return (
+    <div
+      className={`character-slot${itemData ? "" : " character-slot--empty"}`}
+      draggable={!!itemData}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onMouseEnter={itemData && onTooltipShow ? (e) => onTooltipShow(e, itemData.name, itemData.rarity) : undefined}
+      onMouseMove={itemData ? onTooltipMove : undefined}
+      onMouseLeave={itemData ? onTooltipHide : undefined}
+      onContextMenu={
+        itemData && onContextMenu
+          ? (e) =>
+              onContextMenu(e, {
+                id: equippedItem.id,
+                instanceId: equippedItem.instanceId,
+                source: "character",
+                slotId: slot.id
+              })
+          : undefined
+      }
+    >
+      {itemData ? (
+        <img 
+          src={itemData.icon} 
+          alt={itemData.name} 
+          className="character-slot__icon" 
+          draggable="false" 
+          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+        />
+      ) : (
+        <span className="character-slot__label">{slot.label}</span>
+      )}
+    </div>
+  );
+}
+
+export function CharacterSlotColumn({
+  slots,
+  side,
+  equippedItems,
+  currencies,
+  onEquipmentDrop,
+  onEquipmentDragStart,
+  onContextMenu,
+  onTooltipShow,
+  onTooltipMove,
+  onTooltipHide
+}) {
   if (!slots) return null;
   return (
     <div className={`character-column character-column--${side}`}>
       {slots.map((slot) => (
-        <div className="character-slot" key={slot.id}>
-          <span className="character-slot__label">{slot.label}</span>
-        </div>
+        <CharacterSlot
+          key={slot.id}
+          slot={slot}
+          equippedItem={equippedItems?.[slot.id]}
+          currencies={currencies}
+          onDrop={onEquipmentDrop}
+          onDragStart={onEquipmentDragStart}
+          onContextMenu={onContextMenu}
+          onTooltipShow={onTooltipShow}
+          onTooltipMove={onTooltipMove}
+          onTooltipHide={onTooltipHide}
+        />
       ))}
     </div>
   );
@@ -35,7 +119,15 @@ export function CharacterStatsPanel({
 export function CharacterWeaponBar({
   weaponSlots,
   isOuterLayer,
-  onToggleLayer
+  onToggleLayer,
+  equippedItems,
+  currencies,
+  onEquipmentDrop,
+  onEquipmentDragStart,
+  onContextMenu,
+  onTooltipShow,
+  onTooltipMove,
+  onTooltipHide
 }) {
   if (!weaponSlots) return null;
   return (
@@ -45,41 +137,21 @@ export function CharacterWeaponBar({
       </button>
       <div className="character-weapon-bar">
         {weaponSlots.map((slot) => (
-          <div className="character-weapon-slot" key={slot.id}>
-            <span className="character-slot__label">{slot.label}</span>
-          </div>
+          <CharacterSlot
+            key={slot.id}
+            slot={slot}
+            equippedItem={equippedItems?.[slot.id]}
+            currencies={currencies}
+            onDrop={onEquipmentDrop}
+            onDragStart={onEquipmentDragStart}
+            onContextMenu={onContextMenu}
+            onTooltipShow={onTooltipShow}
+            onTooltipMove={onTooltipMove}
+            onTooltipHide={onTooltipHide}
+          />
         ))}
       </div>
     </div>
-  );
-}
-
-export function CharacterBagSlot({
-  hasBag,
-  bagIcon,
-  bagName,
-  bagRarity,
-  onBagDrop,
-  onBagDragOver,
-  onBagDragStart,
-  onTooltipShow,
-  onTooltipMove,
-  onTooltipHide
-}) {
-  return (
-    <button
-      className={`character-bag-slot${hasBag ? "" : " character-bag-slot--empty"}`}
-      type="button"
-      draggable={hasBag}
-      onDragStart={hasBag ? onBagDragStart : undefined}
-      onDragOver={onBagDragOver}
-      onDrop={onBagDrop}
-      onMouseEnter={hasBag && onTooltipShow ? (e) => onTooltipShow(e, bagName, bagRarity) : undefined}
-      onMouseMove={hasBag ? onTooltipMove : undefined}
-      onMouseLeave={hasBag ? onTooltipHide : undefined}
-    >
-      {bagIcon ? <img src={bagIcon} alt={bagName} draggable="false" /> : null}
-    </button>
   );
 }
 
@@ -92,20 +164,29 @@ export function CharacterPanelContent({
   onTooltipShow,
   onTooltipMove,
   onTooltipHide,
-  bagRarity,
-  bagIcon,
-  bagName,
-  hasBag,
-  onBagDrop,
-  onBagDragOver,
-  onBagDragStart
+  onContextMenu,
+  onEquipmentDrop,
+  onEquipmentDragStart,
+  equippedItems,
+  currencies
 }) {
   const { isOuterLayer, leftSlots, rightSlots, weaponSlots } = useCharacterSlots({ gearLayer });
 
   return (
     <div className="character-panel__body">
       <div className="character-layout">
-        <CharacterSlotColumn slots={leftSlots} side="left" />
+        <CharacterSlotColumn
+          slots={leftSlots}
+          side="left"
+          equippedItems={equippedItems}
+          currencies={currencies}
+          onEquipmentDrop={onEquipmentDrop}
+          onEquipmentDragStart={onEquipmentDragStart}
+          onContextMenu={onContextMenu}
+          onTooltipShow={onTooltipShow}
+          onTooltipMove={onTooltipMove}
+          onTooltipHide={onTooltipHide}
+        />
         <div className="character-center">
           <CharacterStatsPanel
             onOpenDetails={onOpenDetails}
@@ -113,29 +194,35 @@ export function CharacterPanelContent({
             onOpenPerks={onOpenPerks}
           />
         </div>
-        <CharacterSlotColumn slots={rightSlots} side="right" />
-      </div>
-      
-      <CharacterWeaponBar
-        weaponSlots={weaponSlots}
-        isOuterLayer={isOuterLayer}
-        onToggleLayer={onToggleLayer}
-      />
-
-      {isOuterLayer && (
-        <CharacterBagSlot
-          hasBag={hasBag}
-          bagIcon={bagIcon}
-          bagName={bagName}
-          bagRarity={bagRarity}
-          onBagDrop={onBagDrop}
-          onBagDragOver={onBagDragOver}
-          onBagDragStart={onBagDragStart}
+        <CharacterSlotColumn
+          slots={rightSlots}
+          side="right"
+          equippedItems={equippedItems}
+          currencies={currencies}
+          onEquipmentDrop={onEquipmentDrop}
+          onEquipmentDragStart={onEquipmentDragStart}
+          onContextMenu={onContextMenu}
           onTooltipShow={onTooltipShow}
           onTooltipMove={onTooltipMove}
           onTooltipHide={onTooltipHide}
         />
-      )}
+      </div>
+      
+      <div className="character-footer">
+        <CharacterWeaponBar
+          weaponSlots={weaponSlots}
+          isOuterLayer={isOuterLayer}
+          onToggleLayer={onToggleLayer}
+          equippedItems={equippedItems}
+          currencies={currencies}
+          onEquipmentDrop={onEquipmentDrop}
+          onEquipmentDragStart={onEquipmentDragStart}
+          onContextMenu={onContextMenu}
+          onTooltipShow={onTooltipShow}
+          onTooltipMove={onTooltipMove}
+          onTooltipHide={onTooltipHide}
+        />
+      </div>
     </div>
   );
 }

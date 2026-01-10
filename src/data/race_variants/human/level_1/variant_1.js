@@ -9,7 +9,7 @@ export const HUMAN_1_VARIANT = {
     stamina: 1,
     intellect: 3
   },
-  perks: ["stamina"],
+  perks: ["stamina", "mana"],
   description:
     "Middle-aged wanderer with a calm stare and a weathered build. A steady hand and stubborn will.",
   devNote: "Starter human variant."

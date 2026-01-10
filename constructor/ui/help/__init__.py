@@ -1,0 +1,1 @@
+from .info.view import create_help_view

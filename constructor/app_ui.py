@@ -28,9 +28,6 @@ class UIState:
         self.avatar_button = tk.Button(toolbar, text="Avatar", command=handlers["avatar"])
         self.avatar_button.pack(side="left", padx=(12, 0))
 
-        self.rarities_button = tk.Button(toolbar, text="Rarities", command=handlers["rarities"])
-        self.rarities_button.pack(side="left", padx=(12, 0))
-
         self.locations_button = tk.Button(toolbar, text="Locations", command=handlers["locations"])
         self.locations_button.pack(side="left", padx=(12, 0))
 
@@ -50,16 +47,37 @@ class UIState:
         self.back_button.pack(side="left", padx=(12, 0))
 
         # --- LEVEL 2 SUBBARS ---
+        self.items_subbar = tk.Frame(header)
+        self.items_info_button = tk.Button(self.items_subbar, text="Info", command=handlers["items_info"])
+        self.items_info_button.pack(side="left")
+        self.items_editor_button = tk.Button(self.items_subbar, text="Editor", command=handlers["items_editor"])
+        self.items_editor_button.pack(side="left", padx=(12, 0))
+        self.items_presets_button = tk.Button(self.items_subbar, text="Presets", command=handlers["rarities_info"])
+        self.items_presets_button.pack(side="left", padx=(12, 0))
+
         self.avatar_subbar = tk.Frame(header)
         self.avatars_info_button = tk.Button(self.avatar_subbar, text="Info", command=handlers["avatar_info"])
         self.avatars_info_button.pack(side="left")
         self.avatar_icon_button = tk.Button(self.avatar_subbar, text="Icon Editor", command=handlers["avatar_editor"])
         self.avatar_icon_button.pack(side="left", padx=(12, 0))
 
-        # NEW: Rarities subbar
-        self.rarities_subbar = tk.Frame(header)
-        self.rarities_info_button = tk.Button(self.rarities_subbar, text="Info", command=handlers["rarities_info"])
+        self.items_presets_subbar = tk.Frame(header)
+        self.rarities_info_button = tk.Button(self.items_presets_subbar, text="Rarities", command=handlers["rarities_info"])
         self.rarities_info_button.pack(side="left")
+        self.types_info_button = tk.Button(self.items_presets_subbar, text="Types", command=handlers["types_info"])
+        self.types_info_button.pack(side="left", padx=(12, 0))
+
+        self.locations_subbar = tk.Frame(header)
+        self.locations_info_button = tk.Button(self.locations_subbar, text="Info", command=handlers["locations_info"])
+        self.locations_info_button.pack(side="left")
+
+        self.map_subbar = tk.Frame(header)
+        self.map_info_button = tk.Button(self.map_subbar, text="Info", command=handlers["map_info"])
+        self.map_info_button.pack(side="left")
+
+        self.help_subbar = tk.Frame(header)
+        self.help_info_button = tk.Button(self.help_subbar, text="Info", command=handlers["help_info"])
+        self.help_info_button.pack(side="left")
 
         self.stats_perks_group_subbar = tk.Frame(header)
         self.stats_group_btn = tk.Button(self.stats_perks_group_subbar, text="Stats", command=handlers["stats_info"])
@@ -101,19 +119,20 @@ class UIState:
 
     def set_active_view(self, active: str | None) -> None:
         # Detect Groups
+        is_items = active in ("items", "items_editor", "rarities", "types")
         is_avatar = active in ("avatars", "avatar_editor")
-        # Rarities is now considered a group (even if size 1) to show subbar
-        is_rarities = active == "rarities"
+        is_locations = active == "locations"
+        is_map = active == "map"
+        is_help = active == "help"
         is_stats_perks_group = active in ("stats_info", "stats_config", "resources_info", "perks_info", "bloodline_info", "bloodline_race")
         
         # 1. Main Styles
-        self._apply_active_style(self.items_button, active == "items")
+        self._apply_active_style(self.items_button, is_items)
         self._apply_active_style(self.avatar_button, is_avatar)
-        self._apply_active_style(self.rarities_button, is_rarities)
-        self._apply_active_style(self.locations_button, active == "locations")
+        self._apply_active_style(self.locations_button, is_locations)
         self._apply_active_style(self.stats_perks_button, is_stats_perks_group)
-        self._apply_active_style(self.map_button, active == "map")
-        self._apply_active_style(self.help_button, active == "help")
+        self._apply_active_style(self.map_button, is_map)
+        self._apply_active_style(self.help_button, is_help)
 
         # 2. Level 2 (Category) Styles
         self._apply_active_style(self.stats_group_btn, active in ("stats_info", "stats_config"))
@@ -121,12 +140,17 @@ class UIState:
         self._apply_active_style(self.perks_group_btn, active == "perks_info")
         self._apply_active_style(self.bloodline_group_btn, active in ("bloodline_info", "bloodline_race"))
         
-        # Avatar subbar styles
+        # Subbar styles
+        self._apply_active_style(self.items_info_button, active == "items")
+        self._apply_active_style(self.items_editor_button, active == "items_editor")
+        self._apply_active_style(self.items_presets_button, active in ("rarities", "types"))
         self._apply_active_style(self.avatars_info_button, active == "avatars")
         self._apply_active_style(self.avatar_icon_button, active == "avatar_editor")
-        
-        # Rarities subbar styles
         self._apply_active_style(self.rarities_info_button, active == "rarities")
+        self._apply_active_style(self.types_info_button, active == "types")
+        self._apply_active_style(self.locations_info_button, is_locations)
+        self._apply_active_style(self.map_info_button, is_map)
+        self._apply_active_style(self.help_info_button, is_help)
 
         # 3. Level 3 (Section) Styles
         self._apply_active_style(self.stats_info_btn, active == "stats_info")
@@ -137,14 +161,23 @@ class UIState:
         self._apply_active_style(self.bloodline_race_btn, active == "bloodline_race")
 
         # 4. Visibility Control
-        for bar in (self.avatar_subbar, self.rarities_subbar, self.stats_perks_group_subbar, self.stats_section_subbar, 
+        for bar in (self.items_subbar, self.items_presets_subbar, self.avatar_subbar, self.locations_subbar, 
+                    self.map_subbar, self.help_subbar, self.stats_perks_group_subbar, self.stats_section_subbar, 
                     self.resources_section_subbar, self.perks_section_subbar, self.bloodline_section_subbar):
             bar.pack_forget()
 
-        if is_avatar:
+        if is_items:
+            self.items_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
+            if active in ("rarities", "types"):
+                self.items_presets_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
+        elif is_avatar:
             self.avatar_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
-        elif is_rarities:
-            self.rarities_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
+        elif is_locations:
+            self.locations_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
+        elif is_map:
+            self.map_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
+        elif is_help:
+            self.help_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
         elif is_stats_perks_group:
             self.stats_perks_group_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
             if active in ("stats_info", "stats_config"): self.stats_section_subbar.pack(fill="x", pady=(6, 0), anchor="nw")
@@ -173,10 +206,11 @@ class UIState:
 
     def all_buttons(self) -> list[tk.Button]:
         return [
-            self.items_button, self.avatar_button, self.rarities_button, self.locations_button, 
+            self.items_button, self.avatar_button, self.locations_button, 
             self.stats_perks_button, self.map_button, self.help_button, self.exit_button, self.back_button,
+            self.items_info_button, self.items_editor_button, self.items_presets_button,
             self.avatars_info_button, self.avatar_icon_button, 
-            self.rarities_info_button,
+            self.rarities_info_button, self.types_info_button,
             self.stats_group_btn, self.res_group_btn,
             self.perks_group_btn, self.bloodline_group_btn, self.bloodline_info_btn, self.bloodline_race_btn,
             self.stats_info_btn, self.stats_config_btn, self.resources_info_btn, self.perks_info_btn

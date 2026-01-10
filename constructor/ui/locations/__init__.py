@@ -1,0 +1,1 @@
+from .info.view import create_locations_view

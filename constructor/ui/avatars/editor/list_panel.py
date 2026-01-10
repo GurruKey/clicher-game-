@@ -12,6 +12,7 @@ from ...theme import (
 )
 
 from constants import SLOT_BG, SLOT_BORDER
+from ...common import StandardLeftList
 from ..common import build_layer
 
 
@@ -40,18 +41,18 @@ class AvatarListPanel:
         self._row_selected_hover_bg = ROW_SELECTED_HOVER_BG
         self._row_border = ROW_BORDER
 
-        search_row = tk.Frame(parent)
+        self._list_view = StandardLeftList(parent)
+        self._list_view.pack(fill="both", expand=True)
+
+        search_row = tk.Frame(self._list_view.top_frame)
         search_row.pack(fill="x", pady=(0, 8))
         tk.Label(search_row, text="Search").pack(side="left")
         self._search_var = tk.StringVar()
         search_entry = tk.Entry(search_row, textvariable=self._search_var, width=22)
         search_entry.pack(side="left", padx=(8, 0))
 
-        # Avatar List using ScrollableFrame
-        self._scroll_view = ScrollableFrame(parent, auto_hide=True, min_width=260)
-        self._scroll_view.pack(side="left", fill="y", expand=False)
-        self._inner = self._scroll_view.inner_frame
-        self._canvas = self._scroll_view.canvas
+        self._inner = self._list_view.inner
+        self._canvas = self._list_view.scroll_frame.canvas
 
         self._search_index = self._build_search_index()
         self._render_list([avatar for avatar, _blob in self._search_index])
@@ -126,18 +127,7 @@ class AvatarListPanel:
         self._row_entries.clear()
 
         for avatar in filtered:
-            row = tk.Frame(
-                self._inner,
-                bg=self._row_bg,
-                highlightthickness=1,
-                highlightbackground=self._row_border,
-                highlightcolor=self._row_border
-            )
-            row.pack(fill="x", pady=5)
-
-            row_inner = tk.Frame(row, bg=self._row_bg)
-            row_inner.pack(fill="x", padx=8, pady=6)
-
+            row, row_inner = self._list_view.create_row_frame(bg=self._row_bg, border=self._row_border)
             row_widgets: list[tk.Widget] = [row, row_inner]
 
             icon_canvas = tk.Canvas(
@@ -229,3 +219,4 @@ class AvatarListPanel:
             if not query or query in blob
         ]
         self._render_list(filtered)
+

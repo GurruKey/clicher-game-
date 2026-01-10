@@ -2,8 +2,8 @@ import tkinter as tk
 import tkinter.font as tkfont
 import tkinter.ttk as ttk
 
-BG_COLOR = "#101010"
-PANEL_BG = "#171717"
+BG_COLOR = "#000000"
+PANEL_BG = "#000000"
 PANEL_BG_ALT = "#1d1d1d"
 BORDER_COLOR = "#2a2a2a"
 DIVIDER_COLOR = "#2a2a2a"
@@ -36,14 +36,20 @@ MODE_ACTIVE_BG = "#1f3b1f"
 MODE_ACTIVE_FG = "#b8f5b8"
 
 ENTRY_BG = "#151515"
-LIST_BG = "#191919"
-SELECT_BG = "#303030"
+LIST_BG = "#000000"
+SELECT_BG = "#2a2a2a"
 
-ROW_BG = "#1a1a1a"
-ROW_HOVER_BG = "#262626"
-ROW_SELECTED_BG = "#3a3a3a"
-ROW_SELECTED_HOVER_BG = "#444444"
-ROW_BORDER = "#2f2f2f"
+ROW_BG = "#000000"
+ROW_HOVER_BG = "#151515"
+ROW_SELECTED_BG = "#2a2a2a"
+ROW_SELECTED_HOVER_BG = "#333333"
+ROW_BORDER = "#1a1a1a"
+
+# Standard List Layout
+LIST_ROW_PADY = 2
+LIST_ROW_INNER_PADX = 8
+LIST_ROW_INNER_PADY = 6
+LIST_CONTAINER_PADX = 0 # Inner padding for the list container if needed
 
 SCROLLBAR_BG = "#2a2a2a"
 SCROLLBAR_ACTIVE_BG = "#3a3a3a"
@@ -89,6 +95,46 @@ def apply_dark_theme(root) -> None:
             "Dark.Horizontal.TScrollbar",
             background=[("active", SCROLLBAR_ACTIVE_BG)]
         )
+
+        # Treeview Style
+        style.configure(
+            "Dark.Treeview",
+            background=BG_COLOR,
+            foreground=TEXT_COLOR,
+            fieldbackground=BG_COLOR,
+            borderwidth=0,
+            font=("Segoe UI", 9)
+        )
+        style.map(
+            "Dark.Treeview",
+            background=[("selected", SELECT_BG)],
+            foreground=[("selected", "#ffffff")]
+        )
+
+        # Combobox Style
+        style.configure(
+            "TCombobox",
+            fieldbackground=ENTRY_BG,
+            background=BUTTON_BG,
+            foreground=TEXT_COLOR,
+            arrowcolor=TEXT_COLOR,
+            bordercolor=BORDER_COLOR,
+            lightcolor=BORDER_COLOR,
+            darkcolor=BORDER_COLOR,
+            insertcolor=TEXT_COLOR,
+        )
+        style.map(
+            "TCombobox",
+            fieldbackground=[("readonly", ENTRY_BG)],
+            foreground=[("readonly", TEXT_COLOR)]
+        )
+
+        # Fix for popdown list background
+        root.option_add("*TCombobox*Listbox.background", ENTRY_BG)
+        root.option_add("*TCombobox*Listbox.foreground", TEXT_COLOR)
+        root.option_add("*TCombobox*Listbox.selectBackground", SELECT_BG)
+        root.option_add("*TCombobox*Listbox.selectForeground", TEXT_COLOR)
+
     except tkfont.TclError:
         pass
     try:
@@ -135,6 +181,7 @@ def apply_dark_theme(root) -> None:
     root.option_add("*Entry.InsertBackground", TEXT_COLOR)
     root.option_add("*Entry.DisabledBackground", PANEL_BG)
     root.option_add("*Entry.DisabledForeground", TEXT_MUTED)
+    root.option_add("*Entry.readonlyBackground", ENTRY_BG)
     root.option_add("*Entry.Relief", "solid")
     root.option_add("*Entry.BorderWidth", 1)
     root.option_add("*Entry.HighlightThickness", 1)
@@ -270,7 +317,7 @@ class ScrollableFrame(tk.Frame):
 class ModernPanedWindow(tk.PanedWindow):
     def __init__(self, parent, horizontal=True, **kwargs):
         orient = tk.HORIZONTAL if horizontal else tk.VERTICAL
-        bg = kwargs.pop("bg", "#2a2a2a") 
+        bg = kwargs.pop("bg", BG_COLOR) 
         
         super().__init__(
             parent, 

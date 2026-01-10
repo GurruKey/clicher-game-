@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
-import { BAGS, DEFAULT_BAG_ID } from "../../data/bags.js";
+import { drinkPotion } from "../../logic/items/potions/potionLogic.js";
+import { BAGS } from "../../data/bags.js";
+import { STARTER_CONFIG } from "../../data/starter_packs.js";
 import { CURRENCIES } from "../../data/currencies/index.js";
 import bagUiIcon from "../../assets/ui/bag.png";
 import { BASE_INVENTORY_SLOTS } from "../../config/inventory.js";
-import useInventory from "../inventory/useInventory.js";
-import useInventoryBadge from "../inventory/useInventoryBadge.js";
+import useInventory from "../inventory/core/useInventory.js";
+import useInventoryBadge from "../inventory/core/useInventoryBadge.js";
 import useContextMenu from "../menus/useContextMenu.js";
 import useTooltip from "../ui/useTooltip.js";
 
@@ -15,7 +17,8 @@ const useInventoryFlowState = ({
   currencies,
   bagUiIcon,
   addNotice,
-  initialInventory
+  initialData,
+  getMaxStack
 }) => {
   const { tooltip, showTooltip, moveTooltip, hideTooltip } = useTooltip();
   const { contextMenu, menuRef, openContextMenu, closeContextMenu } =
@@ -35,7 +38,8 @@ const useInventoryFlowState = ({
     bagUiIcon,
     addNotice,
     onClearTooltip: hideTooltip,
-    initialInventory
+    initialData,
+    getMaxStack
   });
   const closeOverlays = () => {
     hideTooltip();
@@ -70,25 +74,29 @@ const useInventoryPanels = ({
   baseSlotCount
 }) => {
   const {
-    inventoryList,
     closeOverlays,
     visibleBagSlots,
-    visibleSlotCount,
-    bagButtonIcon,
-    bagButtonName,
     dragIndex,
     handleDragStart,
     handleDragEnd,
     handleDragOver,
     handleDrop,
-    handleBagSlotDrop,
-    handleEquippedBagDragStart,
+    handleEquipmentDragStart,
+    handleEquipmentDrop,
+    equippedItems,
     openContextMenu,
     showTooltip,
     moveTooltip,
     hideTooltip,
-    equippedBag
+    equippedBag,
+    equippedBagId,
+    handleBagToggle: inventoryHandleBagToggle
   } = inventoryState;
+
+  const inventoryList = visibleBagSlots;
+  const visibleSlotCount = visibleBagSlots.length;
+  const bagButtonIcon = equippedBag?.icon || bagUiIcon;
+  const bagButtonName = equippedBag?.name || "Inventory";
 
   const [isBagOpen, setIsBagOpen] = useState(false);
   const { newTypesCount, markAllSeen } = useInventoryBadge({
@@ -97,15 +105,18 @@ const useInventoryPanels = ({
     onBagClose: closeOverlays
   });
 
-  const handleBagToggle = () => {
+  const handleBagToggle = useCallback(() => {
     setIsBagOpen((prev) => {
       const next = !prev;
       if (next) {
         markAllSeen();
       }
+      if (inventoryHandleBagToggle) {
+          inventoryHandleBagToggle(equippedBagId);
+      }
       return next;
     });
-  };
+  }, [markAllSeen, inventoryHandleBagToggle, equippedBagId]);
 
   const handleMapOpen = () => {
     if (closeOverlays) {
@@ -135,10 +146,10 @@ const useInventoryPanels = ({
     onContextMenu: openContextMenu,
     onTooltipShow: showTooltip,
     onTooltipMove: moveTooltip,
-    onTooltipHide: hideTooltip
+    onTooltipHide: hideTooltip,
+    equippedItems
   };
 
-  const bagRarity = equippedBag ? currencies[equippedBag.id]?.rarity : undefined;
   const characterPanelProps = {
     isOpen: isCharacterOpen,
     gearLayer,
@@ -149,13 +160,14 @@ const useInventoryPanels = ({
     onTooltipShow: showTooltip,
     onTooltipMove: moveTooltip,
     onTooltipHide: hideTooltip,
-    bagRarity,
-    bagIcon: equippedBag?.icon,
-    bagName: equippedBag?.name ?? "Bag Slot",
-    hasBag: Boolean(equippedBag),
-    onBagDrop: handleBagSlotDrop,
-    onBagDragOver: handleDragOver,
-    onBagDragStart: handleEquippedBagDragStart
+    onContextMenu: openContextMenu,
+    onEquipmentDragStart: handleEquipmentDragStart,
+    onEquipmentDrop: handleEquipmentDrop,
+    equippedItems: {
+      ...equippedItems,
+      bag: equippedBag ? { id: equippedBag.id, instanceId: equippedBagId } : null
+    },
+    currencies
   };
 
   return {
@@ -179,8 +191,27 @@ const useGameInventoryFlow = ({
   onOpenDetails,
   onOpenBloodline,
   onOpenPerks,
-  initialInventory
+  initialInventory,
+  addResource,
+  getMaxStack
 }) => {
+  // Pre-generate starter inventory if none exists
+  const effectiveInitialInventory = initialInventory || (() => {
+    const slots = Array(baseSlotCount).fill(null);
+    if (STARTER_CONFIG.initialItems) {
+      STARTER_CONFIG.initialItems.forEach((item, index) => {
+        if (index < baseSlotCount) {
+          slots[index] = { id: item.id, count: item.count };
+        }
+      });
+    }
+    return {
+      baseSlots: slots,
+      bagSlotsById: {},
+      equippedBagId: null
+    };
+  })();
+
   const inventoryState = useInventoryFlowState({
     baseSlotCount,
     bags,
@@ -188,7 +219,8 @@ const useGameInventoryFlow = ({
     currencies,
     bagUiIcon,
     addNotice,
-    initialInventory
+    initialData: effectiveInitialInventory,
+    getMaxStack
   });
 
   const { bagProps, characterPanelProps, isBagOpen } = useInventoryPanels({
@@ -214,13 +246,66 @@ const useGameInventoryFlow = ({
     closeDeleteDialog,
     updateDeleteValue,
     fillDeleteAll,
-    confirmDelete
+    confirmDelete,
+    setEquippedItems,
+    setEquippedBagId,
+    handleEquipFromBag,
+    handleUseItem
   } = inventoryState;
+
+  const handleDeleteBag = () => {
+    setEquippedBagId(null);
+  };
+
+  const handleDeleteEquipped = (slotId) => {
+    if (slotId === "bag") {
+      handleDeleteBag();
+      return;
+    }
+    setEquippedItems((prev) => {
+      const next = { ...prev };
+      delete next[slotId];
+      return next;
+    });
+  };
+
+  const handleUnequip = (slotId, itemId, instanceId) => {
+    const success = inventoryState.placeItemInVisibleSlots(itemId, 1, { instanceId });
+    
+    if (success) {
+      if (slotId === "bag") {
+        setEquippedBagId(null);
+      } else {
+        setEquippedItems((prev) => {
+          const next = { ...prev };
+          delete next[slotId];
+          return next;
+        });
+      }
+    }
+  };
 
   const contextMenuProps = {
     contextMenu,
     menuRef,
     onDelete: (payload) => {
+      if (payload.action === "unequip") {
+        handleUnequip(payload.slotId, payload.id, payload.instanceId);
+        closeContextMenu();
+        return;
+      }
+      if (payload.action === "equip") {
+        handleEquipFromBag(payload.index, payload.id);
+        closeContextMenu();
+        return;
+      }
+      if (payload.action === "use") {
+        handleUseItem(payload.index, (itemData) => {
+           return drinkPotion(itemData, { addResource });
+        });
+        closeContextMenu();
+        return;
+      }
       openDeleteDialog(payload);
       closeContextMenu();
     }
@@ -232,7 +317,7 @@ const useGameInventoryFlow = ({
     onChange: updateDeleteValue,
     onAll: fillDeleteAll,
     onCancel: closeDeleteDialog,
-    onConfirm: confirmDelete
+    onConfirm: () => confirmDelete(handleDeleteEquipped, handleDeleteBag)
   };
 
   return {
@@ -254,12 +339,17 @@ export default function useGameInventorySetup({
   addNotice,
   initialInventory,
   onOpenDetails,
-  onOpenBloodline
+  onOpenBloodline,
+  addResource
 }) {
+  const getMaxStack = useCallback((itemId) => {
+    return CURRENCIES[itemId]?.maxStack || 1;
+  }, []);
+
   return useGameInventoryFlow({
     baseSlotCount: BASE_INVENTORY_SLOTS,
     bags: BAGS,
-    defaultBagId: DEFAULT_BAG_ID,
+    defaultBagId: STARTER_CONFIG.defaultBagId,
     currencies: CURRENCIES,
     bagUiIcon,
     addNotice,
@@ -270,6 +360,8 @@ export default function useGameInventorySetup({
     onOpenDetails,
     onOpenBloodline,
     onOpenPerks: dialogs.perksDialog.open,
-    initialInventory
+    initialInventory,
+    addResource,
+    getMaxStack
   });
 }

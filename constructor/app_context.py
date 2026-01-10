@@ -20,7 +20,9 @@ class AppPaths:
     race_tags_root: Path
     races_root: Path
     rarities_root: Path
+    types_root: Path
     avatars_root: Path
+    item_assets_root: Path
     stats_path: Path
     perks_path: Path
     resources_path: Path
@@ -51,8 +53,10 @@ def build_paths(constructor_root: Path) -> AppPaths:
         race_levels_root=project_root / "src" / "data" / "race_variants" / "levels",
         race_tags_root=project_root / "src" / "data" / "race_variants" / "tags",
         races_root=project_root / "src" / "data" / "race_variants" / "races",
-        rarities_root=project_root / "src" / "data" / "rarities",
+        rarities_root=project_root / "src" / "data" / "items" / "presets" / "rarities",
+        types_root=project_root / "src" / "data" / "items" / "presets" / "types",
         avatars_root=project_root / "src" / "data" / "avatars",
+        item_assets_root=project_root / "src" / "assets" / "items",
         stats_path=project_root / "src" / "data" / "stats" / "index.js",
         perks_path=project_root / "src" / "data" / "perks" / "index.js",
         resources_path=project_root / "src" / "data" / "resources" / "index.js"

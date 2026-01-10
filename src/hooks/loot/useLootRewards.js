@@ -82,7 +82,6 @@ export default function useLootRewards({
       const loot = currencies[lootId];
       if (addNotice) {
         addNotice({
-          id: Date.now(),
           name: loot?.name ?? lootId,
           icon: loot?.icon,
           rarity: loot?.rarity ?? "common",

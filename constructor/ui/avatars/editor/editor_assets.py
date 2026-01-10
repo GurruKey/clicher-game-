@@ -4,6 +4,7 @@ import os
 import shutil
 import tkinter as tk
 from pathlib import Path
+from PIL import Image, ImageTk
 
 from ...theme import ACCENT_COLOR, BORDER_COLOR, ScrollableFrame, ModernButton
 
@@ -196,14 +197,16 @@ class AvatarAssetsPanel:
             )
             tile.pack(side="left", padx=4, pady=6)
             try:
-                image = tk.PhotoImage(file=str(asset_path))
-            except tk.TclError:
+                with Image.open(asset_path) as img:
+                    target = 56
+                    ratio = min(target / img.width, target / img.height)
+                    new_size = (int(img.width * ratio), int(img.height * ratio))
+                    img = img.resize(new_size, Image.Resampling.LANCZOS)
+                    image = ImageTk.PhotoImage(img)
+                    assets_images.append(image)
+            except Exception:
                 continue
-            target = 56
-            scale = max(image.width() / target, image.height() / target)
-            if scale > 1:
-                image = image.subsample(int(scale))
-            assets_images.append(image)
+            
             label = tk.Label(tile, image=image)
             label.pack()
             if is_used:

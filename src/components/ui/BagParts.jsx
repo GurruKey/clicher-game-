@@ -1,4 +1,5 @@
 import React from "react";
+import { resolveTargetSlot } from "../../logic/items/wear/equip/equipLogic.js";
 import buildBagDisplayOrder from "./utils/buildBagDisplayOrder.js";
 
 export function BagSlot({
@@ -15,7 +16,8 @@ export function BagSlot({
   onContextMenu,
   onTooltipShow,
   onTooltipMove,
-  onTooltipHide
+  onTooltipHide,
+  equippedItems
 }) {
   if (!currency) {
     return (
@@ -40,13 +42,16 @@ export function BagSlot({
       onMouseEnter={(event) => onTooltipShow(event, currency.name, currency.rarity)}
       onMouseMove={onTooltipMove}
       onMouseLeave={onTooltipHide}
-      onContextMenu={(event) =>
+      onContextMenu={(event) => {
+        const canEquip = Boolean(resolveTargetSlot(currency, equippedItems || {}));
         onContextMenu(event, {
           id: slot.id,
           source: "bag",
-          index: slotIndex
-        })
-      }
+          index: slotIndex,
+          equippable: canEquip,
+          usable: Boolean(currency.effects)
+        });
+      }}
     >
       <img
         className="bag-slot__icon"
@@ -72,7 +77,8 @@ export function BagGrid({
   onContextMenu,
   onTooltipShow,
   onTooltipMove,
-  onTooltipHide
+  onTooltipHide,
+  equippedItems
 }) {
   const displayOrder = buildBagDisplayOrder({ slotCount, baseSlotCount });
 
@@ -103,6 +109,7 @@ export function BagGrid({
             onTooltipShow={onTooltipShow}
             onTooltipMove={onTooltipMove}
             onTooltipHide={onTooltipHide}
+            equippedItems={equippedItems}
           />
         );
       })}
@@ -145,7 +152,8 @@ export function Bag({
   onContextMenu,
   onTooltipShow,
   onTooltipMove,
-  onTooltipHide
+  onTooltipHide,
+  equippedItems
 }) {
   return (
     <aside className={`bag ${isOpen ? "bag--open" : "bag--closed"}`}>
@@ -172,6 +180,7 @@ export function Bag({
             onTooltipShow={onTooltipShow}
             onTooltipMove={onTooltipMove}
             onTooltipHide={onTooltipHide}
+            equippedItems={equippedItems}
           />
         </div>
       ) : null}

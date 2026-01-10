@@ -132,12 +132,11 @@ def create_stats_info_view(
 
     def render_list(filtered: list[dict]):
         inner = list_widgets["inner"]
+        list_view = list_widgets["list_view"]
         for child in inner.winfo_children(): child.destroy()
         row_entries.clear()
         for stat in filtered:
-            row = tk.Frame(inner, bg=ROW_BG, highlightthickness=1, highlightbackground=ROW_BORDER, highlightcolor=ROW_BORDER)
-            row.pack(fill="x", pady=5)
-            row_inner = tk.Frame(row, bg=ROW_BG); row_inner.pack(fill="x", padx=8, pady=6)
+            row, row_inner = list_view.create_row_frame(bg=ROW_BG, border=ROW_BORDER)
             row_widgets = [row, row_inner]
             lbl = tk.Label(row_inner, text=stat["label"], anchor="w", bg=ROW_BG); lbl.pack(side="left", fill="x", expand=True); row_widgets.append(lbl)
             row_entries.append({"id": stat["id"], "widgets": row_widgets})

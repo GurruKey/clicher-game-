@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { pickLootByChance } from "../../utils/loot.js";
 
 export default function useLootEngine({
   location,
@@ -41,7 +42,11 @@ export default function useLootEngine({
       } else {
         setIsWorking(false);
         setProgress(0);
-        if (onLoot) onLoot();
+        if (onLoot) {
+          const lootTable = location?.lootTable;
+          const lootId = pickLootByChance(lootTable);
+          if (lootId) onLoot(lootId);
+        }
       }
     };
 

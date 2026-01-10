@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { RARITIES } from "../../data/rarities/index.js";
+import { RARITIES } from "../../data/items/presets/rarities/index.js";
 
 export default function useRarityTheme() {
   useEffect(() => {

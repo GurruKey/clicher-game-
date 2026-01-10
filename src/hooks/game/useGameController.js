@@ -154,22 +154,15 @@ function useGameLootFlow({
   currencies,
   durationMs,
   addNotice,
+  resources,
+  addResource,
+  consumeResource,
   placeItemInVisibleSlots,
   onLocationClick,
   squeezeLeft,
   squeezeRight,
-  initialResources,
-  initialDrops,
-  playerPerks,
-  calculatedMaxResources
+  initialDrops
 }) {
-  const { resources, consumeResource, addResource } = useResources(
-    ALL_RESOURCES_DATA.RESOURCES || [], 
-    playerPerks,
-    initialResources,
-    calculatedMaxResources
-  );
-
   const { locationItems, handleLoot, locationDrops } = useLootRewards({
     currencies,
     addNotice,
@@ -199,6 +192,8 @@ function useGameLootFlow({
 
   return {
     resources,
+    addResource,
+    consumeResource,
     clickAreaProps,
     locationItems,
     locationDrops
@@ -211,24 +206,24 @@ function useGameLootSetup({
   addNotice,
   inventoryFlow,
   navigation,
-  initialResources,
   initialDrops,
-  playerPerks,
-  calculatedMaxResources
+  resources,
+  addResource,
+  consumeResource
 }) {
   const lootFlow = useGameLootFlow({
     location,
     currencies: CURRENCIES,
     durationMs: WORK_DURATION_MS,
     addNotice,
+    resources,
+    addResource,
+    consumeResource,
     placeItemInVisibleSlots: inventoryFlow.placeItemInVisibleSlots,
     onLocationClick: navigation.handleOpenLocation,
     squeezeLeft: dialogs.characterDialog.isOpen,
     squeezeRight: inventoryFlow.isBagOpen,
-    initialResources,
-    initialDrops,
-    playerPerks,
-    calculatedMaxResources
+    initialDrops
   });
 
   return {
@@ -239,7 +234,7 @@ function useGameLootSetup({
 function useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks = [] }) {
   const location = useCurrentLocation();
   const { keybinds, updateKeybind } = useKeybinds();
-  
+
   const [playerPerks, setPlayerPerks] = useState(() => {
       if (initialSave?.perks && initialSave.perks.length > 0) {
           return initialSave.perks;
@@ -268,6 +263,13 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks =
 
   useRarityTheme();
 
+  const { resources, consumeResource, addResource } = useResources(
+    ALL_RESOURCES_DATA.RESOURCES || [], 
+    playerPerks,
+    initialSave?.resources ?? null,
+    calculatedMaxResources
+  );
+
   const { lootNotices, addNotice } = useLootNotices();
   const dialogs = useGameDialogsState();
   const inventoryFlow = useGameInventorySetup({
@@ -275,7 +277,8 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks =
     addNotice,
     initialInventory: initialSave?.inventory ?? null,
     onOpenDetails: dialogs.statsDialog.open,
-    onOpenBloodline: dialogs.bloodlineDialog.open
+    onOpenBloodline: dialogs.bloodlineDialog.open,
+    addResource
   });
 
   const navigation = useGameNavigation({
@@ -289,10 +292,10 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks =
     addNotice,
     inventoryFlow,
     navigation,
-    initialResources: initialSave?.resources ?? null,
     initialDrops: initialSave?.loot ?? null,
-    playerPerks,
-    calculatedMaxResources
+    resources,
+    addResource,
+    consumeResource
   });
 
   const dialogProps = useGameDialogSetup({
@@ -319,7 +322,10 @@ function useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks =
     playerPerks,
     setPlayerPerks,
     calculatedStats,
-    calculatedMaxResources
+    calculatedMaxResources,
+    resources,
+    addResource,
+    consumeResource
   };
 }
 
@@ -341,7 +347,9 @@ export default function useGameController({
     keybinds,
     playerPerks,
     calculatedStats,
-    calculatedMaxResources
+    calculatedMaxResources,
+    resources,
+    staminaCurrent
   } = useGameFlows({ initialSave, staminaBonus, staminaEnabled, avatarPerks });
   
   const handleBagToggle = inventoryFlow.bagProps?.onBagToggle;
@@ -378,17 +386,17 @@ export default function useGameController({
   useEffect(() => {
     saveGameSave({
       inventory: inventoryFlow.inventorySnapshot,
-      resources: lootFlow.resources,
+      resources: resources,
       loot: lootFlow.locationDrops,
       perks: playerPerks
     });
-  }, [inventoryFlow.inventorySnapshot, lootFlow.resources, lootFlow.locationDrops, playerPerks]);
+  }, [inventoryFlow.inventorySnapshot, resources, lootFlow.locationDrops, playerPerks]);
 
   return {
-    resources: lootFlow.resources || {},
+    resources: resources || {},
     calculatedStats,
     calculatedMaxResources,
-    staminaCurrent: lootFlow.resources?.["max_stamina"] || 0,
+    staminaCurrent: staminaCurrent || 0,
     staminaMax: staminaMax || 0,
     onToggleCharacter: navigation.handleToggleCharacter,
     clickAreaProps: lootFlow.clickAreaProps,

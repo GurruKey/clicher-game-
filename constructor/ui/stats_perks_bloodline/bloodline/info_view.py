@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Any
 
-from ui.ui_common import create_header, create_scrollable_list, create_search_bar
+from ui.common import create_header, create_scrollable_list, create_search_bar, StandardLeftList
 from ui.theme import PANEL_BG, TEXT_COLOR, TITLE_COLOR, BG_COLOR, ROW_BORDER, ROW_BG, ROW_HOVER_BG, ROW_SELECTED_BG, ModernPanedWindow
 
 
@@ -52,20 +52,19 @@ def create_bloodline_info_view(
     paned_window.pack(fill="both", expand=True, padx=10, pady=10)
 
     # --- Left Sidebar ---
-    sidebar = tk.Frame(paned_window, bg=PANEL_BG, width=300)
-    sidebar.pack_propagate(False)
-    paned_window.add(sidebar, minsize=200)
+    list_view = StandardLeftList(paned_window)
+    paned_window.add(list_view, minsize=200)
 
-    create_header(sidebar, "Race Variants")
+    create_header(list_view.top_frame, "Race Variants")
 
     def on_search(query: str):
         filter_list(query)
 
-    search_frame = tk.Frame(sidebar, bg=PANEL_BG)
+    search_frame = tk.Frame(list_view.top_frame, bg=PANEL_BG)
     search_frame.pack(fill="x", padx=10, pady=(0, 10))
     create_search_bar(search_frame, on_search)
 
-    list_frame, list_inner = create_scrollable_list(sidebar)
+    list_inner = list_view.inner
 
     # --- Right Content ---
     content_area = tk.Frame(paned_window, bg=PANEL_BG)
@@ -239,23 +238,15 @@ def create_bloodline_info_view(
                 sep_lbl.pack(side="left", fill="both")
                 last_race_id = race_id
 
-            row = tk.Frame(
-                list_inner,
-                bg=ROW_BG,
-                highlightthickness=1,
-                highlightbackground=ROW_BORDER
-            )
-            row.pack(fill="x", pady=1)
+            row, row_inner = list_view.create_row_frame(bg=ROW_BG, border=ROW_BORDER)
             
             variant_name = variant.get("id", "Unnamed")
             
             lbl = tk.Label(
-                row,
+                row_inner,
                 text=variant_name,
                 bg=ROW_BG,
                 fg=TEXT_COLOR,
-                padx=15,
-                pady=8,
                 anchor="w"
             )
             lbl.pack(fill="both", expand=True)

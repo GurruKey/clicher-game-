@@ -21,7 +21,22 @@ export default function ContextMenu({
         event.stopPropagation();
       }}
     >
-      {contextMenu.source === "bag" ? (
+      {contextMenu.source === "character" && (
+        <button type="button" onClick={() => onDelete({ ...contextMenu, action: "unequip" })}>
+          Unequip
+        </button>
+      )}
+      {contextMenu.source === "bag" && contextMenu.equippable && (
+        <button type="button" onClick={() => onDelete({ ...contextMenu, action: "equip" })}>
+          Equip
+        </button>
+      )}
+      {contextMenu.source === "bag" && contextMenu.usable && (
+        <button type="button" onClick={() => onDelete({ ...contextMenu, action: "use" })}>
+          Use
+        </button>
+      )}
+      {contextMenu.source === "bag" || contextMenu.source === "character" || contextMenu.source === "character_bag" ? (
         <button type="button" onClick={() => onDelete(contextMenu)}>
           Delete
         </button>

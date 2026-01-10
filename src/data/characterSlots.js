@@ -13,7 +13,8 @@ export const CHARACTER_OUTER_RIGHT = [
   { id: "bracers", label: "Bracers" },
   { id: "gloves", label: "Gloves" },
   { id: "kneepads", label: "Kneepads" },
-  { id: "talisman", label: "Talisman" }
+  { id: "talisman", label: "Talisman" },
+  { id: "bag", label: "Bag" }
 ];
 
 export const CHARACTER_INNER_LEFT = [

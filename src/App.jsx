@@ -23,6 +23,12 @@ export default function App() {
   const [selectedAvatarId, setSelectedAvatarId] = useState(DEFAULT_AVATAR_ID);
 
   useEffect(() => {
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener("contextmenu", handleContextMenu);
+
     const stored = window.localStorage.getItem(AVATAR_STORAGE_KEY);
     const known = AVATARS.some((avatar) => avatar.id === stored);
     if (known && stored) {
@@ -30,6 +36,10 @@ export default function App() {
     }
     setHasAvatar(known);
     setIsReady(true);
+
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
   }, []);
 
   const selectedAvatar = useMemo(
