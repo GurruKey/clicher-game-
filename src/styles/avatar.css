@@ -1,0 +1,53 @@
+.avatar-circle {
+  --avatar-size: 74px;
+  --avatar-base: 160px;
+  --avatar-scale: 1;
+  --avatar-radius: 14px;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--avatar-radius);
+  border: 1px solid rgba(247, 242, 230, 0.22);
+  background: radial-gradient(circle at 35% 30%, #2a2319, #0c0a08);
+  box-shadow:
+    0 14px 28px -18px rgba(5, 4, 3, 0.8),
+    inset 0 0 14px rgba(202, 164, 74, 0.2);
+  overflow: hidden;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  appearance: none;
+}
+
+.avatar-circle__content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--avatar-base);
+  height: var(--avatar-base);
+  transform: translate(-50%, -50%) scale(var(--avatar-scale));
+  transform-origin: center;
+}
+
+.avatar-circle__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.avatar-circle--selected {
+  border-color: rgba(245, 211, 107, 0.8);
+  box-shadow:
+    0 18px 34px -20px rgba(5, 4, 3, 0.9),
+    inset 0 0 18px rgba(202, 164, 74, 0.35);
+}
+
+.avatar-circle--map {
+  pointer-events: none;
+}
+
+.avatar-circle:focus-visible {
+  outline: 2px solid rgba(202, 164, 74, 0.6);
+  outline-offset: 3px;
+}

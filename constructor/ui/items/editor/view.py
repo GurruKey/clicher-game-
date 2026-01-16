@@ -250,7 +250,7 @@ def create_item_editor_view(
                     desc += f" (Slot: {t.get('slot', 'any')})"
                 if t.get("is_bag"):
                     desc += " [Inventory Container]"
-                lines.append(f"• {desc}")
+                lines.append(f"- {desc}")
             type_info_var.set("\n".join(lines))
             
         # Update Summary (Zone 4)

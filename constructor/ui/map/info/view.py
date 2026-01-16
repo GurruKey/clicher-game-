@@ -42,7 +42,7 @@ def create_map_view(
 
     recenter_button = ModernButton(
         controls_frame,
-        text="◎",
+        text="Center",
         width=3,
         command=lambda: recenter()
     )

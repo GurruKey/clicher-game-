@@ -1,0 +1,15 @@
+@import "./core.css";
+@import "./avatar.css";
+@import "./inventory.css";
+@import "./dialogs.css";
+@import "./overlays.css";
+@import "./resources.css";
+@import "./animations.css";
+
+@font-face {
+  font-family: "Washrasb";
+  src: url("../assets/fonts/washrasb.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

@@ -54,7 +54,7 @@ class RenameDialog(tk.Toplevel):
         self.combo = ttk.Combobox(self, textvariable=self.var, values=existing_names, width=30)
         self.combo.pack(pady=5, padx=10)
         
-        tk.Label(self, text="• Enter a NEW name to rename this stat and update references.\n• Select an EXISTING stat to merge this stat into it.", 
+        tk.Label(self, text="- Enter a NEW name to rename this stat and update references.\n- Select an EXISTING stat to merge this stat into it.", 
                  justify="left", fg="#666", wraplength=300).pack(pady=10, padx=10)
         
         btn_frame = tk.Frame(self)

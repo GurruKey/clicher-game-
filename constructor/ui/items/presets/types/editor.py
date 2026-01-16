@@ -134,15 +134,15 @@ def create_types_editor(
             
             detail_title.config(text=item["label"])
             info_lines = [
-                f"• ID: {item['id']}",
-                f"• Label: {item['label']}",
-                f"• Category: {item.get('category', 'None')}"
+                f"- ID: {item['id']}",
+                f"- Label: {item['label']}",
+                f"- Category: {item.get('category', 'None')}"
             ]
             if item.get("is_bag"):
-                info_lines.append("• Feature: Bag (Increases carrying capacity)")
+                info_lines.append("- Feature: Bag (Increases carrying capacity)")
             if item.get("is_equipment"):
                 slot_name = item.get("slot") or "Any compatible"
-                info_lines.append(f"• Feature: Equipment (Fits into '{slot_name}' slot)")
+                info_lines.append(f"- Feature: Equipment (Fits into '{slot_name}' slot)")
             detail_text.config(text="\n".join(info_lines))
             
             # Disable ID editing if editing existing

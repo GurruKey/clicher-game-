@@ -206,7 +206,7 @@ def create_items_view(
             details.append(f"Bag Capacity: {capacity if capacity is not None else 'unknown'}")
             
         details.extend(["", "Locations:"])
-        details.extend([f"• {loc}" for loc in locations] if locations else ["- None"])
+        details.extend([f"- {loc}" for loc in locations] if locations else ["- None"])
         detail_text.config(text="\n".join(details))
         render_tooltip(item["name"], rarity_colors.get(item["rarity"], DEFAULT_RARITY_COLORS["common"]))
         
