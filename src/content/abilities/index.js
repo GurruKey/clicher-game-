@@ -7,6 +7,7 @@ import { SHADOW_STEP_ABILITY } from "./shadow_step.js";
 import { STAMINA_RESTORE_ABILITY } from "./stamina_restore.js";
 import { STAMINA_AURA_ABILITY } from "./stamina_aura.js";
 import { MANA_REGEN_BUFF_ABILITY } from "./mana_regen_buff.js";
+import { STAMINA_HEALTH_BUFF_ABILITY } from "./stamina_health_buff.js";
 
 export const ABILITIES = [
   COLLECTING_ABILITY,
@@ -17,7 +18,8 @@ export const ABILITIES = [
   SHADOW_STEP_ABILITY,
   STAMINA_RESTORE_ABILITY,
   STAMINA_AURA_ABILITY,
-  MANA_REGEN_BUFF_ABILITY
+  MANA_REGEN_BUFF_ABILITY,
+  STAMINA_HEALTH_BUFF_ABILITY
 ];
 
 export const getAbilityById = (id) => {

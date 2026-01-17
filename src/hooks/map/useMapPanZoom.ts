@@ -11,7 +11,7 @@ export default function useMapPanZoom(params: {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [offset, setOffset] = useState({ x: focusOffset?.x ?? 0, y: focusOffset?.y ?? 0 });
   const [zoom, setZoom] = useState(1);
 
   const boundsRef = useMapBounds({
@@ -67,16 +67,11 @@ function useMapBounds(params: {
     if (!mapEl || !canvasEl) return;
 
     const updateBounds = () => {
-      const mapWidth = mapEl.offsetWidth;
-      const mapHeight = mapEl.offsetHeight;
-      const canvasWidth = canvasEl.offsetWidth * zoom;
-      const canvasHeight = canvasEl.offsetHeight * zoom;
-      const maxX = Math.max(0, (canvasWidth - mapWidth) / 2);
-      const maxY = Math.max(0, (canvasHeight - mapHeight) / 2);
-      boundsRef.current = { minX: -maxX, maxX, minY: -maxY, maxY };
+      const limit = 100000;
+      boundsRef.current = { minX: -limit, maxX: limit, minY: -limit, maxY: limit };
       setOffset((prev) => ({
-        x: clamp(prev.x, -maxX, maxX),
-        y: clamp(prev.y, -maxY, maxY)
+        x: clamp(prev.x, -limit, limit),
+        y: clamp(prev.y, -limit, limit)
       }));
     };
 

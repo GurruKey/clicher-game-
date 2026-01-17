@@ -6,7 +6,9 @@ import type { CalcNodeDefinition } from "../systems/calc/calcEngine";
 import { calculateFinalResources, type ResourceDefinition } from "../systems/resources/calculateFinalResources";
 import { deriveResourcesConfig } from "./resourcesDerive";
 import { selectCalculatedStatsFromRoot } from "./statsDerive";
-import { selectPerkIds } from "./playerSlice";
+import { selectAbilityBuffsById, selectPerkIds } from "./playerSlice";
+import { getBuffBonuses } from "../systems/abilities/buffs";
+import { ABILITIES } from "../content/abilities/index.js";
 
 export const selectActiveResourceDefs = createSelector([selectPerkIds], (perkIds) => {
   const { activeDefs } = deriveResourcesConfig(perkIds);
@@ -14,13 +16,19 @@ export const selectActiveResourceDefs = createSelector([selectPerkIds], (perkIds
 });
 
 export const selectResourcesMaxById = createSelector(
-  [selectCalculatedStatsFromRoot, selectActiveResourceDefs],
-  (calculatedStats, activeDefs) => {
+  [selectCalculatedStatsFromRoot, selectActiveResourceDefs, selectAbilityBuffsById],
+  (calculatedStats, activeDefs, abilityBuffsById) => {
+    const buffBonuses = getBuffBonuses({
+      abilities: ABILITIES,
+      buffsById: abilityBuffsById,
+      nowMs: Date.now()
+    });
+
     return calculateFinalResources(
       calculatedStats,
       activeDefs as ResourceDefinition[],
       STATS as unknown as CalcNodeDefinition[],
-      {}
+      buffBonuses.resourceBonuses
     );
   }
 );
@@ -43,4 +51,3 @@ export const selectResourcesView = createSelector(
     });
   }
 );
-

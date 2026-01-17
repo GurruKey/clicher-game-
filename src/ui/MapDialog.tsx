@@ -26,6 +26,16 @@ export default function MapDialog() {
 
   const { mapMenu, menuRef, openMenu, closeMenu } = useMapContextMenu({ isOpen: ui.isMapOpen });
   const avatarOffset = 58;
+
+  const focusOffset = useMemo(() => {
+    const currentLoc = (LOCATIONS as Record<string, any>)[currentLocationId];
+    const coords = currentLoc?.coords ?? { x: 0, y: 0 };
+    return {
+      x: -(coords.x * 1000),
+      y: (coords.y * 1000) + avatarOffset
+    };
+  }, [currentLocationId]);
+
   const {
     mapRef,
     canvasRef,
@@ -39,7 +49,7 @@ export default function MapDialog() {
   } = useMapPanZoom({
     isOpen: ui.isMapOpen,
     onDragStart: closeMenu,
-    focusOffset: { x: 0, y: avatarOffset }
+    focusOffset
   });
 
   const handleLocationClick = (id: string) => {

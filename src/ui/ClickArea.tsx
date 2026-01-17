@@ -23,6 +23,7 @@ export default function ClickArea() {
   const isWorking = Boolean(work.isWorking);
   const isMoving = isWorking && work.locationId && work.locationId !== selectedLocationId;
 
+  const targetLocation = isMoving ? (LOCATIONS as Record<string, any>)[work.locationId!] : null;
   const ability = work.abilityId ? getAbilityById(work.abilityId) : null;
   const workOverlay = (ability as any)?.workOverlay;
 
@@ -52,13 +53,20 @@ export default function ClickArea() {
     return () => cancelAnimationFrame(rafId);
   }, [durationMs, isWorking, work.startedAtMs]);
 
-  const label = location?.name ?? "Unknown";
+  const label = isMoving 
+    ? `TRAVELING TO ${targetLocation?.name ?? "..."}` 
+    : (location?.name ?? "Unknown");
   const cost = Number(location?.resourceCost ?? 1);
   const timeLabel = isWorking ? `${remainingSeconds.toFixed(1)}s` : stamina < cost ? "No stamina" : "\u00A0";
 
   return (
     <div className="click-area-wrap">
-      <button className="location-title" type="button" onClick={() => dispatch(openLocation(undefined))}>
+      <button
+        className="location-title"
+        type="button"
+        onClick={() => !isMoving && dispatch(openLocation(undefined))}
+        style={isMoving ? { cursor: "default" } : undefined}
+      >
         {label}
       </button>
 

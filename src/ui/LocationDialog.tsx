@@ -131,8 +131,19 @@ export default function LocationDialog() {
           <div className="location-dialog__travel">
             <div className="location-dialog__section-title">Travel Info</div>
             {travelInfo && (
-              <div className="location-dialog__travel-details">
-                Distance: {travelInfo.distance.toFixed(1)} km | Cost: {travelInfo.cost} Stamina | Time: {travelInfo.duration}s
+              <div className="location-dialog__travel-grid">
+                <div className="location-dialog__stat-box">
+                  <div className="location-dialog__stat-label">Distance</div>
+                  <div className="location-dialog__stat-value">{travelInfo.distance.toFixed(1)} km</div>
+                </div>
+                <div className="location-dialog__stat-box">
+                  <div className="location-dialog__stat-label">Cost</div>
+                  <div className="location-dialog__stat-value">{travelInfo.cost} Stamina</div>
+                </div>
+                <div className="location-dialog__stat-box">
+                  <div className="location-dialog__stat-label">Time</div>
+                  <div className="location-dialog__stat-value">{travelInfo.duration}s</div>
+                </div>
               </div>
             )}
             <button 

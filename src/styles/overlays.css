@@ -69,8 +69,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 160%;
-  height: 160%;
+  width: 250000px;
+  height: 250000px;
   transform: translate(-50%, -50%);
 }
 
