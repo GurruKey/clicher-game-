@@ -4,6 +4,9 @@ Language rule:
 - Communicate with me in Russian (all explanations, questions, discussion).
 - The project itself remains in English: code, folder/file names, identifiers, comments, documentation, commit messages, and UI text (unless I explicitly request otherwise).
 
+Development Environment:
+- The project is developed on macOS. Assume macOS paths, shell commands, and environment behavior (not Windows).
+
 Project source of truth:
 - The repository root contains PROJECT_GUIDE.md.
 - PROJECT_GUIDE.md is the single source of truth for structure, responsibility boundaries, and “where things go.”

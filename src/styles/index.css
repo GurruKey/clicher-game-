@@ -5,6 +5,7 @@
 @import "./overlays.css";
 @import "./resources.css";
 @import "./animations.css";
+@import "./buffs.css";
 
 @font-face {
   font-family: "Washrasb";

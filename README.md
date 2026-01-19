@@ -1,6 +1,6 @@
 ﻿# Clicker Game (Migration Workspace)
 
-This repo contains an ongoing migration from legacy code in `srcold/` to a Redux Toolkit + React + TypeScript implementation in `src/`.
+This repo contains a Redux Toolkit + React + TypeScript implementation in `src/`.
 
 ## Run
 - Install: `npm install`

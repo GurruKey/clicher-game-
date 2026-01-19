@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 type ContextMenuBase = { x: number; y: number } & Record<string, unknown>;
 
 /**
- * Mirrors `srcold/hooks/menus/useContextMenu.js`.
+ * Mirrors legacy logic.
  */
 export default function useContextMenu<T extends ContextMenuBase>() {
   const [contextMenu, setContextMenu] = useState<T | null>(null);

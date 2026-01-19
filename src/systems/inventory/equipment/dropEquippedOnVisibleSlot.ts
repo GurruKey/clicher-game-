@@ -62,7 +62,7 @@ export function dropEquippedOnVisibleSlot(params: {
     if (effectiveTargetIndex === null) return { ok: false, next: snapshot };
     const effectiveTargetSlot = visibleSlots[effectiveTargetIndex] ?? null;
 
-    // Prevent moving a bag that contains nested bags-with-items into base inventory (mirrors srcold).
+    // Prevent moving a bag that contains nested bags-with-items into base inventory (mirrors legacy logic).
     if (hasNestedBagWithItems({ snapshot, containerId: equippedBagId, bagsByItemId })) {
       return { ok: false, next: snapshot };
     }

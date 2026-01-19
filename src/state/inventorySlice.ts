@@ -104,7 +104,7 @@ const inventorySlice = createSlice({
       const sourceSlot = visibleSlots[dragIndex] ?? null;
       if (!sourceSlot) return;
 
-      // Prevent placing a bag into its own currently open container (srcold parity).
+      // Prevent placing a bag into its own currently open container (legacy logic parity).
       if (equippedBagId && targetIndex >= baseSlotCount) {
         const bagsByItemId = BAGS as unknown as Record<string, { capacity: number }>;
         const isBag = Boolean(bagsByItemId[sourceSlot.id]);

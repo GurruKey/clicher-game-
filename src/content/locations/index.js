@@ -1,5 +1,6 @@
 import { MYSTORY_FOREST } from "./mystory_forest/index.js";
 import { HUNTER_MEADOWS } from "./hunter_meadows/index.js";
+import { TESTING_GROUNDS } from "./testing_grounds/index.js";
 
 /**
  * Реестр всех локаций игры.
@@ -11,6 +12,7 @@ import { HUNTER_MEADOWS } from "./hunter_meadows/index.js";
 const ALL_LOCATIONS = [
   MYSTORY_FOREST,
   HUNTER_MEADOWS,
+  TESTING_GROUNDS,
 ];
 
 export const LOCATIONS = ALL_LOCATIONS.reduce((acc, loc) => {

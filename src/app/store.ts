@@ -63,7 +63,7 @@ import { resetProgress } from "../state/gameThunks";
 import { useAbility } from "../state/abilitiesThunks";
 import { ABILITIES, getAbilityById } from "../content/abilities/index.js";
 import { setAbilityToggled } from "../state/playerSlice";
-import { getManaRegenBonusFromBuffs } from "../systems/abilities/buffs";
+import { getBuffBonuses, getManaRegenBonusFromBuffs } from "../systems/abilities/buffs";
 import { createProfileId, getBaseAvatarIdFromProfileId } from "../systems/player/profileId";
 
 const savedProfileId = loadAvatarId();
@@ -252,11 +252,27 @@ const syncResourceRuntime = () => {
   const { activeDefs, activeIds, baseById } = deriveResourcesConfig(perkIds);
 
   const calculatedStats = selectCalculatedStatsFromRoot(state);
+
+  const buffBonuses = getBuffBonuses({
+    abilities: ABILITIES as any[],
+    buffsById: (selectAbilityBuffsById(state) as any) ?? {},
+    enabledById: (selectAbilityToggledById(state) as any) ?? {},
+    nowMs: Date.now()
+  });
+
+  const overrideBases: Record<string, number> = {};
+  for (const def of activeDefs) {
+    const bonus = buffBonuses.resourceBonuses[def.id] ?? 0;
+    if (bonus !== 0) {
+      overrideBases[def.id] = bonus;
+    }
+  }
+
   const maxById = calculateFinalResources(
     calculatedStats,
     activeDefs,
     STATS as unknown as CalcNodeDefinition[],
-    {}
+    overrideBases
   );
 
   store.dispatch(reconcile({ activeIds, maxById, baseById }));
@@ -295,11 +311,27 @@ const syncResourceRuntime = () => {
       const { activeDefs: latestActiveDefs, baseById: latestBase } = deriveResourcesConfig(
         selectPerkIds(s)
       );
+
+      const buffBonuses = getBuffBonuses({
+        abilities: ABILITIES as any[],
+        buffsById: (selectAbilityBuffsById(s) as any) ?? {},
+        enabledById: (selectAbilityToggledById(s) as any) ?? {},
+        nowMs: Date.now()
+      });
+
+      const overrideBases: Record<string, number> = {};
+      for (const d of latestActiveDefs) {
+        const bonus = buffBonuses.resourceBonuses[d.id] ?? 0;
+        if (bonus !== 0) {
+          overrideBases[d.id] = bonus;
+        }
+      }
+
       const latestMaxById = calculateFinalResources(
         selectCalculatedStatsFromRoot(s),
         latestActiveDefs,
         STATS as unknown as CalcNodeDefinition[],
-        {}
+        overrideBases
       );
       const max = latestMaxById[def.id] ?? latestBase[def.id] ?? 0;
       let amount = 1;
@@ -331,7 +363,7 @@ startAppListening({
   }
 });
 
-// Loot notices timers (mirrors `srcold/hooks/loot/useLootNotices.js`)
+// Loot notices timers (mirrors legacy logic)
 const noticeTimers = new Map<string, { hide: ReturnType<typeof setTimeout>; clear: ReturnType<typeof setTimeout> }>();
 startAppListening({
   actionCreator: addNotice,
@@ -363,7 +395,7 @@ startAppListening({
   }
 });
 
-// Global hotkeys (mirrors `srcold/hooks/game/useGameController.js`)
+// Global hotkeys (mirrors legacy logic)
 if (typeof window !== "undefined") {
   const win = window as any;
   if (!win.__CLICK_HOTKEYS_INSTALLED__) {

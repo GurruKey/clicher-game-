@@ -74,9 +74,10 @@ const resourcesSlice = createSlice({
         const max = maxById[id] ?? baseById[id] ?? 0;
         if (next[id] === undefined) {
           next[id] = max;
-        } else if (next[id] > max) {
-          next[id] = max;
         }
+        // Note: We intentionally do NOT clamp next[id] > max here.
+        // We allow the value to temporarily exceed the new max (e.g. after a debuff),
+        // and let the regen tick drain it down gracefully.
       }
 
       for (const id of Object.keys(next)) {

@@ -10,7 +10,7 @@ export type ResourceDefinition = CalcNodeDefinition & {
 
 /**
  * Calculates final resource maximums considering stat/resource modifiers.
- * Mirrors the current behavior from `srcold/data/resources/engine.js`.
+ * Mirrors the current behavior from legacy logic.
  */
 export function calculateFinalResources(
   calculatedStats: Record<string, number>,
@@ -31,4 +31,3 @@ export function calculateFinalResources(
   }
   return resourceResults;
 }
-

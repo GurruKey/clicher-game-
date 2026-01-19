@@ -10,7 +10,7 @@ export function getManaRegenBonusFromBuffs(args: {
 
   let bonus = 0;
   for (const ability of args.abilities ?? []) {
-    if (!ability || ability.kind !== "buff") continue;
+    if (!ability || (ability.kind !== "buff" && ability.kind !== "debuff")) continue;
     const id = String(ability.id ?? "");
     if (!id) continue;
     const entry = args.buffsById?.[id];
@@ -30,6 +30,7 @@ export function getManaRegenBonusFromBuffs(args: {
 export function getBuffBonuses(args: {
   abilities: any[];
   buffsById: Record<string, ActiveBuff>;
+  enabledById?: Record<string, boolean>;
   nowMs: number;
 }): { statBonuses: Record<string, number>; resourceBonuses: Record<string, number> } {
   const nowMs = Number(args.nowMs);
@@ -41,15 +42,30 @@ export function getBuffBonuses(args: {
   if (!Number.isFinite(nowMs) || nowMs <= 0) return result;
 
   for (const ability of args.abilities ?? []) {
-    if (!ability || ability.kind !== "buff") continue;
-    const id = String(ability.id ?? "");
-    if (!id) continue;
-    const entry = args.buffsById?.[id];
-    if (!entry) continue;
-    const stacks = Math.max(0, Math.floor(Number(entry.stacks ?? 0)));
-    const expiresAtMs = Number(entry.expiresAtMs ?? 0);
+    if (!ability) continue;
+
+    let stacks = 0;
+
+    if (ability.kind === "buff" || ability.kind === "debuff") {
+      const id = String(ability.id ?? "");
+      if (!id) continue;
+      const entry = args.buffsById?.[id];
+      if (entry) {
+        const s = Math.max(0, Math.floor(Number(entry.stacks ?? 0)));
+        const expiresAtMs = Number(entry.expiresAtMs ?? 0);
+        if (s > 0 && Number.isFinite(expiresAtMs) && expiresAtMs > nowMs) {
+          stacks = s;
+        }
+      }
+    } else if (ability.kind === "aura") {
+      const id = String(ability.id ?? "");
+      if (!id) continue;
+      if (args.enabledById?.[id]) {
+        stacks = 1;
+      }
+    }
+
     if (stacks <= 0) continue;
-    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= nowMs) continue;
 
     // Stat Bonuses
     if (ability.statBonuses && typeof ability.statBonuses === "object") {

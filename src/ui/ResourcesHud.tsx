@@ -1,9 +1,16 @@
 import { useAppSelector } from "../app/hooks";
 import { selectResourcesView } from "../state/resourcesSelectors";
 
+const TOTAL_HEIGHT = 90;
+const GAP = 2;
+
 export default function ResourcesHud() {
   const resources = useAppSelector(selectResourcesView);
   if (!resources.length) return null;
+
+  const count = resources.length;
+  const totalGap = Math.max(0, count - 1) * GAP;
+  const barHeight = Math.max(0, (TOTAL_HEIGHT - totalGap) / count);
 
   return (
     <div className="character-resources">
@@ -23,8 +30,8 @@ export default function ResourcesHud() {
             <div
               className="stamina-bar"
               style={{
-                width: 170,
-                height: Math.round(22 * 1.2)
+                width: 286,
+                height: barHeight
               }}
             >
               <div

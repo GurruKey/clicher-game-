@@ -8,7 +8,7 @@ export type TooltipState = {
 } | null;
 
 /**
- * Mirrors `srcold/hooks/ui/useTooltip.js`.
+ * Mirrors legacy logic.
  */
 export default function useTooltip() {
   const [tooltip, setTooltip] = useState<TooltipState>(null);
@@ -27,4 +27,3 @@ export default function useTooltip() {
 
   return { tooltip, showTooltip, moveTooltip, hideTooltip };
 }
-

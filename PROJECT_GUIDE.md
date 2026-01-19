@@ -29,17 +29,22 @@ Static data tables (no business logic). If you want to change definitions (label
 - `src/content/keybinds.js` — keybind defaults + formatting/normalization helpers.
 - `src/content/stats/` — stat definitions + `display_config.js` (categories for UI).
 - `src/content/resources/` — resource definitions (e.g. `max_stamina` base).
+- `src/content/currencies/` — currency definitions.
+- `src/content/factions_variants/`, `src/content/origins_variants/`, `src/content/race_variants/` — character creation options.
+- `src/content/starter_packs.js` — initial equipment sets.
+- `src/content/characterSlots.js` — equipment slot definitions.
 - `src/content/items/`, `src/content/locations/`, `src/content/perks/`, etc — more content tables.
 
 ### `src/systems/`
 Pure functions (no Redux, no React) that implement rules. Prefer adding tests when changing these.
 
-- `src/systems/calc/` — calculation engine used by stats/resources (mirrors `srcold` logic).
+- `src/systems/calc/` — calculation engine used by stats/resources (mirrors legacy logic).
 - `src/systems/inventory/` — inventory + equipment operations (swap, equip, unequip, nested bag checks, normalization).
 - `src/systems/loot/` — loot/drop logic and helpers.
 - `src/systems/resources/` — resource enablement and max calculations.
 - `src/systems/player/` — avatar meta helpers (default perks, sources).
 - `src/systems/items/` — item effects helpers.
+- `src/systems/abilities/` — pure logic for auras and buffs.
 
 ### `src/state/`
 Redux Toolkit slices + selectors/thunks that coordinate systems.
@@ -48,6 +53,7 @@ Redux Toolkit slices + selectors/thunks that coordinate systems.
 - `src/state/resourcesSlice.ts` — current resources + reconcile/regen tick coordination.
 - `src/state/inventorySlice.ts` — inventory snapshot state.
 - `src/state/lootSlice.ts` — per-location drop counters.
+- `src/state/lootNoticesSlice.ts` — queue of loot notifications (toasts).
 - `src/state/workSlice.ts` — current "work" progress (cast/progress bar) used by abilities like Collecting.
 - `src/state/settingsSlice.ts` — keybinds and other settings.
 - `src/state/uiSlice.ts` — which dialogs/panels are open.
@@ -71,7 +77,8 @@ React components. Should be “dumb”: render state, dispatch actions. Avoid pu
 - `src/ui/game/` — GameScreen composition pieces + local UI hooks (bottom bar, overlays, drag/drop, hotkeys).
 - `src/ui/EntryScreen.tsx` - entry flow (profile selection + new profile creation via `+`; a profile is a unique `profileId` that references a base avatar type).
 - `src/ui/InventoryPanel.tsx` / `src/ui/CharacterPanel.tsx` — inventory + equipment UI (DnD + context menus).
-- Dialogs: `src/ui/StatsDialog.tsx`, `src/ui/PerksDialog.tsx`, `src/ui/BloodlineDialog.tsx`, etc.
+- `src/ui/SkillsBar.tsx` — abilities action bar.
+- Dialogs: `src/ui/StatsDialog.tsx`, `src/ui/PerksDialog.tsx`, `src/ui/BloodlineDialog.tsx`, `src/ui/FameDialog.tsx`, `src/ui/ReputationDialog.tsx`, etc.
 - Overlays: `src/ui/Tooltip.tsx`, `src/ui/ContextMenu.tsx`, `src/ui/LootToasts.tsx`.
 
 ### `src/hooks/`
@@ -108,7 +115,7 @@ CSS split by feature area.
 - **Add a new location:** create folder in `src/content/locations/`, define loot and meta, then register in `src/content/locations/index.js` as described in `locations/README.md`.
 - **Change UI layout/styling:** edit `src/ui/*` and the matching CSS in `src/styles/*`.
 - **Change saving behavior:** edit `src/persistence/*` and how it is used in `src/app/store.ts`.
-- **Add a new domain feature:** start in `srcold/` for reference (read-only), implement pure rules in `src/systems/`, wire via `src/state/`, then render in `src/ui/`.
+- **Add a new domain feature:** implement pure rules in `src/systems/`, wire via `src/state/`, then render in `src/ui/`.
 
 ## Notes / guardrails
 
@@ -116,6 +123,5 @@ CSS split by feature area.
 - Inventory item data may include `deletable: false` to hide the Delete action in UI context menus.
 - Legacy-safe loading: `src/systems/inventory/normalizeInventory.ts` may remap old item ids (e.g. `skills_book` -> `hunting_journal`).
 - Profiles: multiple characters can share the same base avatar. `profileId` is unique (format: `<baseAvatarId>:<timestamp>_<suffix>`). Use `src/systems/player/profileId.ts` to create/parse it. Saves are keyed by `profileId`, while avatar meta/perks use the base avatar id (`avatarId`).
-- `srcold/` is the read-only reference; `src/` is the migrated code.
 - `constructor/` is out of scope to modify.
 - `src/vite-env.d.ts` is ambient typing for Vite/TypeScript (it's not imported by code).

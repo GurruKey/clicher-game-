@@ -18,6 +18,10 @@ export const STAMINA_AURA_ABILITY = {
 
   // Effects while enabled
   staminaCostMultiplier: 0.5,
-  workDurationMultiplier: 0.9
-};
+  workDurationMultiplier: 0.9,
 
+  // Bonus stats (unified system)
+  statBonuses: {
+    stamina: 10
+  }
+};

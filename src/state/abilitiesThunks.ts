@@ -16,7 +16,8 @@ import {
   setAbilityCastEndsAt,
   setAbilityTimers,
   setAbilityToggled,
-  applyAbilityBuffStack
+  applyAbilityBuffStack,
+  removeAbilityBuff
 } from "./playerSlice";
 import { finishWork, startWork } from "./workSlice";
 import { applyDelta, consume } from "./resourcesSlice";
@@ -177,5 +178,71 @@ export const useAbility = createAsyncThunk<
     }
   }
 
+  if (ability.kind === "effect_caster") {
+    const manaCost = Math.max(0, Number(ability.manaCost ?? 0));
+    const effects = Array.isArray(ability.effects) ? ability.effects : [];
+    if (manaCost <= 0 || effects.length === 0) return false;
+
+    const currentMana = Number(state.resources.current.max_mana ?? 0);
+    if (!Number.isFinite(currentMana) || currentMana < manaCost) return false;
+
+    thunkApi.dispatch(setAbilityTimers({ abilityId: canonicalAbilityId, delayEndsAtMs, cooldownEndsAtMs }));
+    if (castTimeMs > 0) thunkApi.dispatch(setAbilityCastEndsAt({ abilityId: canonicalAbilityId, endsAtMs: castEndsAtMs }));
+
+    // Pay upfront.
+    thunkApi.dispatch(consume({ id: "max_mana", amount: manaCost }));
+
+    try {
+      if (castTimeMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, castTimeMs));
+      }
+
+      const nowMs = Date.now();
+      for (const effectId of effects) {
+        if (typeof effectId !== "string" || effectId.length === 0) continue;
+        const effectAbility = getAbilityById(effectId) as any;
+        if (!effectAbility) continue;
+
+        const durationMs = Math.max(0, Math.floor(Number(effectAbility.durationMs ?? 0)));
+        const maxStacks = Math.max(1, Math.floor(Number(effectAbility.maxStacks ?? 1)));
+        if (durationMs > 0) {
+          thunkApi.dispatch(applyAbilityBuffStack({ buffId: effectId, maxStacks, durationMs, nowMs }));
+        }
+      }
+      return true;
+    } finally {
+      thunkApi.dispatch(setAbilityCastEndsAt({ abilityId: canonicalAbilityId, endsAtMs: 0 }));
+    }
+  }
+
   return false;
+});
+
+/**
+ * Removes an active buff. If the buff is linked to other effects via a common caster ability,
+ * all related effects (including debuffs) are removed together.
+ */
+export const removeBuff = createAsyncThunk<
+  void,
+  { buffId: string },
+  { state: RootState }
+>("abilities/removeBuff", async ({ buffId }, thunkApi) => {
+  const state = thunkApi.getState();
+  const buff = getAbilityById(buffId) as any;
+  if (!buff) return;
+
+  // Find if this buff is part of a larger ability (effect_caster)
+  const casterAbility = ABILITIES.find((a: any) =>
+    a.kind === "effect_caster" && Array.isArray(a.effects) && a.effects.includes(buffId)
+  ) as any;
+
+  if (casterAbility) {
+    // If it's part of a caster ability, remove ALL effects from that ability
+    for (const effectId of casterAbility.effects) {
+      thunkApi.dispatch(removeAbilityBuff({ buffId: effectId }));
+    }
+  } else {
+    // Otherwise just remove this specific buff
+    thunkApi.dispatch(removeAbilityBuff({ buffId }));
+  }
 });

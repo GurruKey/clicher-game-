@@ -9,7 +9,7 @@ type ItemData = {
 };
 
 /**
- * Mirrors `srcold/logic/items/wear/equip/equipLogic.js` (compat check).
+ * Mirrors legacy logic (compat check).
  */
 const TYPE_TO_SLOT: Record<string, string> = {
   helmet: "head",
@@ -93,4 +93,3 @@ export function canEquipInSlot(itemData: ItemData | null | undefined, slotId: st
     }) || (slotId === "head" && types.includes("helmet"))
   );
 }
-

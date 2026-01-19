@@ -1,5 +1,6 @@
 import AvatarCircle from "../AvatarCircle";
 import ResourcesHud from "../ResourcesHud";
+import BuffsBar from "../BuffsBar";
 import settingsIcon from "../../assets/ui/settings.png";
 
 export default function GameTopHud(props: {
@@ -20,40 +21,44 @@ export default function GameTopHud(props: {
           top: 16,
           left: 16,
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
           alignItems: "flex-start",
-          gap: 8,
+          gap: 2,
           zIndex: 100,
           pointerEvents: "none"
         }}
       >
-        <div style={{ pointerEvents: "auto" }}>
-          <AvatarCircle
-            as="button"
-            className="avatar-circle--hud"
-            size={74}
-            onClick={props.onToggleCharacter}
-            icon={props.avatarMeta?.icon}
-            bg={props.avatarMeta?.bg}
-            name={props.avatarMeta?.name ?? "Avatar"}
-            iconOffset={props.avatarMeta?.iconOffset}
-            iconScale={props.avatarMeta?.iconScale ?? 1}
-            bgOffset={props.avatarMeta?.bgOffset}
-            bgScale={props.avatarMeta?.bgScale ?? 1}
-          />
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", gap: 2 }}>
+          <div style={{ pointerEvents: "auto" }}>
+            <AvatarCircle
+              as="button"
+              className="avatar-circle--hud"
+              size={90}
+              onClick={props.onToggleCharacter}
+              icon={props.avatarMeta?.icon}
+              bg={props.avatarMeta?.bg}
+              name={props.avatarMeta?.name ?? "Avatar"}
+              iconOffset={props.avatarMeta?.iconOffset}
+              iconScale={props.avatarMeta?.iconScale ?? 1}
+              bgOffset={props.avatarMeta?.bgOffset}
+              bgScale={props.avatarMeta?.bgScale ?? 1}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              pointerEvents: "auto",
+              paddingTop: 0
+            }}
+          >
+            <ResourcesHud />
+          </div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 6,
-            pointerEvents: "auto",
-            paddingTop: 4
-          }}
-        >
-          <ResourcesHud />
-        </div>
+        <BuffsBar />
       </div>
     </>
   );

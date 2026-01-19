@@ -82,10 +82,9 @@ export function reconcileResourceState(params: {
       changed = true;
       continue;
     }
-    if (next[id] > max) {
-      next[id] = max;
-      changed = true;
-    }
+    // Note: We intentionally do NOT clamp next[id] > max here.
+    // We allow the value to temporarily exceed the new max (e.g. after a debuff),
+    // and let the regen tick drain it down gracefully.
   }
 
   for (const id of Object.keys(next)) {
@@ -137,10 +136,25 @@ export function applyRegenStep(params: {
 }): ResourceState {
   const { state, id, max, amount = 1 } = params;
   const current = state[id];
-  if (current === undefined || current >= max) return state;
-  return {
-    ...state,
-    [id]: Math.min(max, current + amount)
-  };
-}
 
+  if (current === undefined) return state;
+
+  // Drain logic: if above max, reduce towards max
+  if (current > max) {
+    const drainAmount = Math.abs(amount); // Use magnitude of regen as drain speed
+    return {
+      ...state,
+      [id]: Math.max(max, current - drainAmount)
+    };
+  }
+
+  // Regen logic: if below max, increase towards max
+  if (current < max) {
+    return {
+      ...state,
+      [id]: Math.min(max, current + amount)
+    };
+  }
+
+  return state;
+}

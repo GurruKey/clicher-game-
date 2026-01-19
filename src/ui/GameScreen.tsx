@@ -225,7 +225,7 @@ export default function GameScreen() {
     const prev = prevInventoryOpenRef.current;
     const next = ui.isInventoryOpen;
     if (prev !== next) {
-      // Mirrors srcold bag open/close overlay behavior (closeOverlays + markAllSeen on open).
+      // Mirrors legacy bag open/close overlay behavior (closeOverlays + markAllSeen on open).
       hideTooltip();
       closeContextMenu();
       setDeleteDialog(null);

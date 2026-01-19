@@ -1,1 +1,0 @@
-"""Stats/perks UI package."""

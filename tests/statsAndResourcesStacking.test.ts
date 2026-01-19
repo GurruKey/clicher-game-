@@ -3,7 +3,7 @@ import { getDefaultPerkIdsForAvatarId } from "../src/systems/player/avatarMeta";
 import { selectCalculatedStats } from "../src/state/statsDerive";
 import { selectResourcesMaxById } from "../src/state/resourcesSelectors";
 
-describe("stats/resources stacking (srcold parity)", () => {
+describe("stats/resources stacking (legacy parity)", () => {
   it("stacks avatar stats from race+origin+faction", () => {
     const perkIds = getDefaultPerkIdsForAvatarId("mystic");
     const state = { player: { avatarId: "mystic", perkIds } } as any;

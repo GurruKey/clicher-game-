@@ -2,7 +2,7 @@ import { createSelector } from "@reduxjs/toolkit";
 import { STATS } from "../content/stats/index.js";
 import { ABILITIES } from "../content/abilities/index.js";
 import type { RootState } from "../app/store";
-import { selectAbilityBuffsById, selectPerkIds } from "./playerSlice";
+import { selectAbilityBuffsById, selectAbilityToggledById, selectPerkIds } from "./playerSlice";
 import { getPerkById } from "../content/perks/index.js";
 import { getFactionStats } from "../content/factions_variants/index.js";
 import { getOriginStats } from "../content/origins_variants/index.js";
@@ -12,8 +12,8 @@ import { selectSelectedAvatar } from "./avatarSelectors";
 import { getBuffBonuses } from "../systems/abilities/buffs";
 
 export const selectCalculatedStats = createSelector(
-  [selectSelectedAvatar, selectPerkIds, selectAbilityBuffsById],
-  (selectedAvatar, perkIds, abilityBuffsById): Record<string, number> => {
+  [selectSelectedAvatar, selectPerkIds, selectAbilityBuffsById, selectAbilityToggledById],
+  (selectedAvatar, perkIds, abilityBuffsById, abilityToggledById): Record<string, number> => {
     const sources: unknown[] = [
       selectedAvatar ? getRaceVariantStats((selectedAvatar as { raceVariantId?: unknown }).raceVariantId as string) : null,
       selectedAvatar
@@ -39,6 +39,7 @@ export const selectCalculatedStats = createSelector(
     const buffBonuses = getBuffBonuses({
       abilities: ABILITIES,
       buffsById: abilityBuffsById,
+      enabledById: abilityToggledById,
       nowMs: Date.now()
     });
     sources.push(buffBonuses.statBonuses);

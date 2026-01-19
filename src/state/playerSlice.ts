@@ -296,6 +296,11 @@ const playerSlice = createSlice({
         next[id] = { stacks, expiresAtMs };
       }
       state.abilityBuffsById = next;
+    },
+    removeAbilityBuff(state, action: PayloadAction<{ buffId: string }>) {
+      const buffId = action.payload?.buffId;
+      if (typeof buffId !== "string" || buffId.length === 0) return;
+      delete state.abilityBuffsById[buffId];
     }
   }
 });
@@ -321,6 +326,7 @@ export const {
   applyAbilityBuffStack,
   purgeExpiredAbilityBuffs,
   setAbilityBuffsById,
+  removeAbilityBuff,
   setLocationId,
   setPerkIds,
   setSkillSlot,

@@ -9,7 +9,7 @@ type ItemData = {
 };
 
 /**
- * Mirrors `srcold/logic/items/wear/equip/equipLogic.js`.
+ * Mirrors legacy logic.
  */
 const TYPE_TO_SLOT: Record<string, string> = {
   helmet: "head",
@@ -111,4 +111,3 @@ export function resolveTargetSlot(
 
   return targetSlotId;
 }
-

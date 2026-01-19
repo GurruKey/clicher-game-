@@ -138,11 +138,11 @@ export default function LocationDialog() {
                 </div>
                 <div className="location-dialog__stat-box">
                   <div className="location-dialog__stat-label">Cost</div>
-                  <div className="location-dialog__stat-value">{travelInfo.cost} Stamina</div>
+                  <div className="location-dialog__stat-value">{travelInfo.cost.toFixed(2)} Stamina</div>
                 </div>
                 <div className="location-dialog__stat-box">
                   <div className="location-dialog__stat-label">Time</div>
-                  <div className="location-dialog__stat-value">{travelInfo.duration}s</div>
+                  <div className="location-dialog__stat-value">{travelInfo.duration.toFixed(2)}s</div>
                 </div>
               </div>
             )}

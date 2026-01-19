@@ -14,7 +14,7 @@ export type LocationDropItem = {
 };
 
 /**
- * Mirrors `srcold/hooks/loot/useLootRewards.js` (derived drop-rate list).
+ * Mirrors legacy logic (derived drop-rate list).
  */
 export function buildLocationDropItems(params: {
   locationDrops: LocationDrops;
@@ -37,4 +37,3 @@ export function buildLocationDropItems(params: {
     })
     .sort((a, b) => Number(b.rate) - Number(a.rate));
 }
-
