@@ -39,6 +39,7 @@ import GameBottomBar from "./game/GameBottomBar";
 import GameOverlays from "./game/GameOverlays";
 import { getBagIdFromInstance } from "../systems/inventory/bagInstance";
 import { CURRENCIES } from "../content/currencies/index.js";
+import { takeMobLootItem } from "../state/combatThunks";
 
 export default function GameScreen() {
   const dispatch = useAppDispatch();
@@ -53,6 +54,7 @@ export default function GameScreen() {
     useContextMenu<InventoryContextMenuPayload>();
   const { tooltip, showTooltip, moveTooltip, hideTooltip } = useTooltip();
   const inventory = useAppSelector(selectInventorySnapshot);
+  const combatStatus = useAppSelector((s) => (s as any).combat.status);
   const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState | null>(null);
 
   const activeBagSlots = inventory.equippedBagId ? inventory.bagSlotsById[inventory.equippedBagId] ?? [] : [];
@@ -261,6 +263,7 @@ export default function GameScreen() {
 
   useGameplayKeybinds({
     ui,
+    isCombatActive: combatStatus === "fighting",
     keybinds: keybinds as any,
     skillSlots,
     skillSlots2,
@@ -277,7 +280,7 @@ export default function GameScreen() {
         onOpenSettings={() => dispatch(openSettings())}
       />
 
-      <ClickArea />
+      <ClickArea onStartDrag={startDrag} />
 
       <SkillsBar barId={2} drag={drag?.source === "skillSlot" ? drag : null} onStartDrag={startDrag} />
       <SkillsBar barId={1} drag={drag?.source === "skillSlot" ? drag : null} onStartDrag={startDrag} />
@@ -318,8 +321,15 @@ export default function GameScreen() {
         contextMenu={contextMenu}
         menuRef={menuRef}
         onCloseContextMenu={closeContextMenu}
-        onContextMenuAction={(payload) => {
-          if (payload.source === "bag") {
+    onContextMenuAction={(payload) => {
+      if ((payload as any).source === "mobLoot") {
+        if ((payload as any).action === "take") {
+          dispatch(takeMobLootItem((payload as any).id));
+        }
+        return;
+      }
+
+      if (payload.source === "bag") {
             if (payload.action === "equip") {
               if ((payload as any).equippableSlotId === "bag") {
                 dispatch(equipBagFromVisibleIndex({ dragIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));

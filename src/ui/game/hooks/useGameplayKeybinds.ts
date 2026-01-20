@@ -4,7 +4,7 @@ import { getAbilityById } from "../../../content/abilities/index.js";
 import { resetProgress } from "../../../state/gameThunks";
 import { useAbility } from "../../../state/abilitiesThunks";
 import { useItemFromVisibleIndex } from "../../../state/inventoryThunks";
-import { toggleInventory, toggleMap } from "../../../state/uiSlice";
+import { toggleInventory, toggleMap, triggerSkillError, triggerSkillPress } from "../../../state/uiSlice";
 
 export function useGameplayKeybinds(args: {
   ui: {
@@ -18,13 +18,14 @@ export function useGameplayKeybinds(args: {
     isMapOpen: boolean;
     isLocationOpen: boolean;
   };
+  isCombatActive: boolean;
   keybinds: Record<string, string>;
   skillSlots: Array<string | null>;
   skillSlots2: Array<string | null>;
   itemIndexById: Map<string, number>;
   dispatch: (action: any) => void;
 }): void {
-  const { ui, keybinds, skillSlots, skillSlots2, itemIndexById, dispatch } = args;
+  const { ui, isCombatActive, keybinds, skillSlots, skillSlots2, itemIndexById, dispatch } = args;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -72,14 +73,28 @@ export function useGameplayKeybinds(args: {
         event.preventDefault();
         const assignedItemId = (skillSlots as any)?.[slotIndex] ?? null;
         if (!assignedItemId) return;
+
         const invIndex = itemIndexById.get(String(assignedItemId));
         if (typeof invIndex === "number") {
+          if (isCombatActive) return; // Block inventory in combat
+          dispatch(triggerSkillPress({ barId: 1, index: slotIndex }));
           dispatch(useItemFromVisibleIndex({ slotIndex: invIndex, baseSlotCount: BASE_INVENTORY_SLOTS }));
           return;
         }
-        const ability = getAbilityById(String(assignedItemId));
+
+        const ability = getAbilityById(String(assignedItemId)) as any;
         if (ability) {
-          dispatch(useAbility({ abilityId: String((ability as any).id ?? assignedItemId) }));
+          if (isCombatActive && !ability.isCombat) {
+            dispatch(triggerSkillError({ barId: 1, index: slotIndex }));
+            return;
+          }
+          if (!isCombatActive && ability.isCombat) {
+            dispatch(triggerSkillError({ barId: 1, index: slotIndex }));
+            return;
+          }
+
+          dispatch(triggerSkillPress({ barId: 1, index: slotIndex }));
+          dispatch(useAbility({ abilityId: String(ability.id ?? assignedItemId) }));
         }
         return;
       }
@@ -104,14 +119,28 @@ export function useGameplayKeybinds(args: {
         event.preventDefault();
         const assignedItemId = (skillSlots2 as any)?.[slotIndex] ?? null;
         if (!assignedItemId) return;
+
         const invIndex = itemIndexById.get(String(assignedItemId));
         if (typeof invIndex === "number") {
+          if (isCombatActive) return; // Block inventory in combat
+          dispatch(triggerSkillPress({ barId: 2, index: slotIndex }));
           dispatch(useItemFromVisibleIndex({ slotIndex: invIndex, baseSlotCount: BASE_INVENTORY_SLOTS }));
           return;
         }
-        const ability = getAbilityById(String(assignedItemId));
+
+        const ability = getAbilityById(String(assignedItemId)) as any;
         if (ability) {
-          dispatch(useAbility({ abilityId: String((ability as any).id ?? assignedItemId) }));
+          if (isCombatActive && !ability.isCombat) {
+            dispatch(triggerSkillError({ barId: 2, index: slotIndex }));
+            return;
+          }
+          if (!isCombatActive && ability.isCombat) {
+            dispatch(triggerSkillError({ barId: 2, index: slotIndex }));
+            return;
+          }
+
+          dispatch(triggerSkillPress({ barId: 2, index: slotIndex }));
+          dispatch(useAbility({ abilityId: String(ability.id ?? assignedItemId) }));
         }
         return;
       }
@@ -138,6 +167,7 @@ export function useGameplayKeybinds(args: {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [
     dispatch,
+    isCombatActive,
     itemIndexById,
     keybinds,
     skillSlots,

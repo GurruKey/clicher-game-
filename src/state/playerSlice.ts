@@ -34,8 +34,8 @@ const initialState: PlayerState = {
   locationId: DEFAULT_LOCATION_ID,
   skillSlots: Array(SKILL_SLOTS_COUNT).fill(null),
   skillSlots2: Array(SKILL_SLOTS_COUNT).fill(null),
-  skillsUnlocked: false,
-  knownAbilityIds: [],
+  skillsUnlocked: true,
+  knownAbilityIds: ["basic_attack"],
   seenAbilityIds: [],
   abilityReadyAtById: {},
   abilityDelayEndsAtById: {},
@@ -78,8 +78,8 @@ const playerSlice = createSlice({
       state.locationId = DEFAULT_LOCATION_ID;
       state.skillSlots = Array(SKILL_SLOTS_COUNT).fill(null);
       state.skillSlots2 = Array(SKILL_SLOTS_COUNT).fill(null);
-      state.skillsUnlocked = false;
-      state.knownAbilityIds = [];
+      state.skillsUnlocked = true;
+      state.knownAbilityIds = ["basic_attack"];
       state.seenAbilityIds = [];
       state.abilityReadyAtById = {};
       state.abilityDelayEndsAtById = {};
@@ -97,8 +97,8 @@ const playerSlice = createSlice({
       state.locationId = DEFAULT_LOCATION_ID;
       state.skillSlots = Array(SKILL_SLOTS_COUNT).fill(null);
       state.skillSlots2 = Array(SKILL_SLOTS_COUNT).fill(null);
-      state.skillsUnlocked = false;
-      state.knownAbilityIds = [];
+      state.skillsUnlocked = true;
+      state.knownAbilityIds = ["basic_attack"];
       state.seenAbilityIds = [];
       state.abilityReadyAtById = {};
       state.abilityDelayEndsAtById = {};

@@ -6,6 +6,7 @@
 @import "./resources.css";
 @import "./animations.css";
 @import "./buffs.css";
+@import "./combat.css";
 
 @font-face {
   font-family: "Washrasb";

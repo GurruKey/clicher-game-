@@ -23,6 +23,7 @@ import { finishWork, startWork } from "./workSlice";
 import { applyDelta, consume } from "./resourcesSlice";
 import { selectResourcesMaxById } from "./resourcesSelectors";
 import { getActiveAuraModifiers } from "../systems/abilities/auras";
+import { playerAttack } from "./combatThunks";
 
 export const useAbility = createAsyncThunk<
   boolean,
@@ -35,8 +36,19 @@ export const useAbility = createAsyncThunk<
   if (!ability) return false;
   const canonicalAbilityId = String(ability.id);
 
-  const state = thunkApi.getState();
+  const state = thunkApi.getState() as any;
   if (state.work?.isWorking) return false;
+
+  const isCombatActive = state.combat.status === "fighting";
+  if (isCombatActive && !ability.isCombat) return false;
+  if (!isCombatActive && ability.isCombat) return false;
+
+  // Combat handling
+  if (ability.isCombat && ability.kind === "combat_attack" && isCombatActive) {
+    thunkApi.dispatch(playerAttack(abilityId));
+    return true;
+  }
+
   const readyById = selectAbilityReadyAtById(state);
   const delayEndsById = selectAbilityDelayEndsAtById(state);
   const cooldownEndsById = selectAbilityCooldownEndsAtById(state);

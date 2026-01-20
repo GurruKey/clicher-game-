@@ -46,6 +46,8 @@
   position: absolute;
   right: 0;
   bottom: calc(100% + 12px);
+  transform: scale(var(--game-scale));
+  transform-origin: bottom right;
   width: min(440px, 92vw);
   background: var(--panel);
   border-radius: var(--radius);
@@ -92,14 +94,17 @@
 
 .abilities-panel {
   position: fixed;
-  left: 50%;
-  top: 169px;
-  bottom: 226px;
-  transform: translateX(-50%);
-  width: min(968.6px, 64.14vw);
-  aspect-ratio: 16 / 9;
+  left: 50% !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) scale(var(--game-scale));
+  transform-origin: center center;
+  width: 800px !important;
+  height: 500px !important;
+  max-width: 90vw;
+  max-height: 80vh;
   background: var(--panel);
-  border-radius: 6px;
+  border-radius: 12px;
   padding: 10px;
   border: 1px solid var(--outline);
   box-shadow:
@@ -279,6 +284,8 @@
   width: fit-content;
   max-width: 92vw;
   max-height: calc(100vh - 140px);
+  transform: scale(var(--game-scale));
+  transform-origin: bottom left;
   padding: 16px;
   border-radius: 16px;
   border: 1px solid var(--outline);

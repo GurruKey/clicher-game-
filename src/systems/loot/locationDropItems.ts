@@ -1,4 +1,4 @@
-import type { LocationDrops } from "./drops";
+import type { DropStats } from "./drops";
 
 export type CurrencyMeta = {
   name?: string;
@@ -17,7 +17,7 @@ export type LocationDropItem = {
  * Mirrors legacy logic (derived drop-rate list).
  */
 export function buildLocationDropItems(params: {
-  locationDrops: LocationDrops;
+  locationDrops: DropStats;
   currenciesById: Record<string, CurrencyMeta | undefined>;
 }): LocationDropItem[] {
   const { locationDrops, currenciesById } = params;

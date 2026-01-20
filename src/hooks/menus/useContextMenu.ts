@@ -35,6 +35,8 @@ export default function useContextMenu<T extends ContextMenuBase>() {
       if (el && event.target && el.contains(event.target as Node)) {
         return;
       }
+      // Проверяем, не является ли нажатие попыткой открыть новое меню (правой кнопкой)
+      // Хотя этот обработчик на pointerdown, обычно контекстное меню открывается по contextmenu
       closeContextMenu();
     };
     const handleKey = (event: KeyboardEvent) => {
@@ -61,7 +63,7 @@ export default function useContextMenu<T extends ContextMenuBase>() {
     const nextX = contextMenu.x > maxX ? Math.max(padding, maxX) : contextMenu.x;
     const nextY = contextMenu.y > maxY ? Math.max(padding, maxY) : contextMenu.y;
 
-    if (nextX === contextMenu.x && nextY === contextMenu.y) return;
+    if (Math.abs(nextX - contextMenu.x) < 1 && Math.abs(nextY - contextMenu.y) < 1) return;
 
     setContextMenu((prev) => (prev ? ({ ...prev, x: nextX, y: nextY } as T) : prev));
   }, [contextMenu]);

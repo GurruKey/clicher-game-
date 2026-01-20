@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ABILITIES } from "../content/abilities/index.js";
 import { getAbilityFrameById } from "../content/abilities/frames/index.js";
 import autoRepeatIcon from "../assets/abilities/helpers/auto_repeat.png";
+import { createPortal } from "react-dom";
 
 type DragState = { source: "ability"; abilityId: string } | null;
 
@@ -20,7 +21,7 @@ export default function AbilitiesPanel(props: {
     return (ABILITIES as any[]).filter((a) => a && typeof a.id === "string" && known.has(a.id));
   }, [props.knownAbilityIds]);
 
-  return (
+  return createPortal(
     <aside className="abilities-panel" aria-label="Abilities">
       <div className="abilities-panel__header">
         <span>Abilities</span>
@@ -100,6 +101,7 @@ export default function AbilitiesPanel(props: {
           </div>
         </div>
       )}
-    </aside>
+    </aside>,
+    document.body
   );
 }

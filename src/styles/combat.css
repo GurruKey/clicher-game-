@@ -1,0 +1,71 @@
+.shake {
+  animation: shake-animation 0.2s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake-animation {
+  10%, 90% { transform: translate3d(-50%, -50%, 0) translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(-50%, -50%, 0) translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-50%, -50%, 0) translate3d(-8px, 0, 0); }
+  40%, 60% { transform: translate3d(-50%, -50%, 0) translate3d(8px, 0, 0); }
+}
+
+.combat-mob-wrap {
+  z-index: 10;
+  pointer-events: none;
+}
+
+.mob-hp-bar {
+  box-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+.mob-attack-jump {
+  animation: mob-jump-animation 0.3s ease-out;
+}
+
+@keyframes mob-jump-animation {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -30%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.mob--dead {
+  transform: translate(-50%, -50%) rotate(180deg) scale(0.8) !important;
+  transition: transform 0.5s ease-in-out;
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+.mob-loot-glow {
+  filter: drop-shadow(0 0 10px var(--glow-color, gold)) drop-shadow(0 0 20px var(--glow-color, gold));
+  animation: loot-pulse 2s infinite ease-in-out;
+}
+
+@keyframes loot-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px var(--glow-color, gold)) drop-shadow(0 0 12px var(--glow-color, gold)); }
+  50% { filter: drop-shadow(0 0 15px var(--glow-color, gold)) drop-shadow(0 0 25px var(--glow-color, gold)); }
+}
+
+.mob-loot-overlay {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.mob-loot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 44px);
+  gap: 8px;
+  background: rgba(20, 20, 20, 0.95);
+  padding: 8px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  min-width: 60px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+  pointer-events: auto;
+}

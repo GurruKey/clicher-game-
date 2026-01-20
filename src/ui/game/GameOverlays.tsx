@@ -28,6 +28,7 @@ export default function GameOverlays(props: {
     isLocationOpen: boolean;
     isMapOpen: boolean;
     isCharacterOpen: boolean;
+    isSpellsOpen?: boolean;
   };
   drag: DragState;
   dragCursor: DragCursor | null;
@@ -79,7 +80,13 @@ export default function GameOverlays(props: {
       {props.drag && props.dragIconSrc && props.dragCursor && props.dragHotspot ? (
         <div
           className="drag-preview"
-          style={{ left: props.dragCursor.x - props.dragHotspot.x, top: props.dragCursor.y - props.dragHotspot.y }}
+          style={{
+            position: "fixed",
+            left: props.dragCursor.x - props.dragHotspot.x,
+            top: props.dragCursor.y - props.dragHotspot.y,
+            zIndex: 9999,
+            pointerEvents: "none"
+          }}
         >
           <img src={props.dragIconSrc} alt="" draggable={false} />
         </div>
@@ -104,4 +111,3 @@ export default function GameOverlays(props: {
     </>
   );
 }
-

@@ -80,21 +80,17 @@
   height: 100%;
   transform-origin: center;
   transform: scale(var(--map-scale, 1)) translate(var(--map-x, 0px), var(--map-y, 0px));
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(247, 242, 230, 0.04) 0,
-      rgba(247, 242, 230, 0.04) 1px,
-      transparent 1px,
-      transparent 48px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(247, 242, 230, 0.035) 0,
-      rgba(247, 242, 230, 0.035) 1px,
-      transparent 1px,
-      transparent 48px
-    );
+}
+
+.map-dialog__canvas-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(247, 242, 230, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 242, 230, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
 }
 
 .map-dialog__location {

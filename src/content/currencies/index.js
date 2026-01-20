@@ -14,6 +14,8 @@ import { MANA_POTION } from "./mana_potion.js";
 import { STAMINA_POTION } from "./stamina_potion.js";
 import { HUNTING_JOURNAL } from "./books/hunting_journal.js";
 import { CHEAT_BOOK } from "./special/cheat_book.js";
+import { RAT_TAIL } from "./rat_tail.js";
+import { RAT_EAR } from "./rat_ear.js";
 
 export const CURRENCIES = {
   [BALASHKA.id]: BALASHKA,
@@ -31,7 +33,9 @@ export const CURRENCIES = {
   [MANA_POTION.id]: MANA_POTION,
   [STAMINA_POTION.id]: STAMINA_POTION,
   [HUNTING_JOURNAL.id]: HUNTING_JOURNAL,
-  [CHEAT_BOOK.id]: CHEAT_BOOK
+  [CHEAT_BOOK.id]: CHEAT_BOOK,
+  [RAT_TAIL.id]: RAT_TAIL,
+  [RAT_EAR.id]: RAT_EAR
 };
 
 export {
@@ -50,5 +54,7 @@ export {
   MANA_POTION,
   STAMINA_POTION,
   HUNTING_JOURNAL,
-  CHEAT_BOOK
+  CHEAT_BOOK,
+  RAT_TAIL,
+  RAT_EAR
 };

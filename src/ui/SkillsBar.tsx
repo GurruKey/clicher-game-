@@ -7,6 +7,7 @@ import { formatKeybind } from "../content/keybinds";
 import { DEFAULT_LOCATION_ID, LOCATIONS } from "../content/locations/index.js";
 import { useItemFromVisibleIndex } from "../state/inventoryThunks";
 import { useAbility } from "../state/abilitiesThunks";
+import { playerAttack } from "../state/combatThunks";
 import { selectInventorySnapshot } from "../state/inventorySlice";
 import {
   selectAbilityCooldownEndsAtById,
@@ -50,6 +51,8 @@ export default function SkillsBar(props: {
   const toggledById = useAppSelector(selectAbilityToggledById) as Record<string, boolean>;
   const resources = useAppSelector(selectResourcesCurrent);
   const locationId = useAppSelector(selectLocationId);
+  const combat = useAppSelector((s) => s.combat);
+  const ui = useAppSelector((s) => (s as any).ui);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [pressedIndex, setPressedIndex] = useState<number | null>(null);
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
@@ -124,6 +127,24 @@ export default function SkillsBar(props: {
     const id = window.setInterval(() => setNowMs(Date.now()), 50);
     return () => window.clearInterval(id);
   }, [castEndsAtById, cooldownEndsAtById, delayEndsAtById]);
+
+  useEffect(() => {
+    if (ui.skillError && ui.skillError.barId === props.barId) {
+      if (errorTimerRef.current !== null) window.clearTimeout(errorTimerRef.current);
+      const index = ui.skillError.index;
+      setErrorIndex(index);
+      errorTimerRef.current = window.setTimeout(() => setErrorIndex((prev) => (prev === index ? null : prev)), 260);
+    }
+  }, [ui.skillError, props.barId]);
+
+  useEffect(() => {
+    if (ui.skillPress && ui.skillPress.barId === props.barId) {
+      const index = ui.skillPress.index;
+      setPressedIndex(index);
+      const timer = window.setTimeout(() => setPressedIndex((prev) => (prev === index ? null : prev)), 100);
+      return () => window.clearTimeout(timer);
+    }
+  }, [ui.skillPress, props.barId]);
 
   useEffect(() => {
     return () => {
@@ -294,9 +315,14 @@ export default function SkillsBar(props: {
           const castPct =
             castTotalMs > 0 ? Math.min(100, Math.max(0, (castRemainingMs / castTotalMs) * 100)) : 0;
 
+          const isCombatActive = combat.status === "fighting";
+
           const canUseNow =
             !abilityMeta ||
             (() => {
+              if (isCombatActive && !abilityMeta.isCombat) return false;
+              if (!isCombatActive && abilityMeta.isCombat) return false;
+
               const kind = String((abilityMeta as any)?.kind ?? "");
               const isAuraToggle = kind === "aura" && Boolean((abilityMeta as any)?.toggle);
               const isAuraEnabled = isAuraToggle ? Boolean((toggledById as any)?.[String(abilityMeta.id)]) : false;
@@ -327,7 +353,13 @@ export default function SkillsBar(props: {
             })();
 
           const activate = () => {
+            if (isCombatActive && abilityMeta?.isCombat && abilityMeta.kind === "combat_attack") {
+              dispatch(playerAttack(String(abilityMeta.id)));
+              return;
+            }
+
             if (inventoryIndex !== null) {
+              if (isCombatActive) return; // Block inventory in combat for now
               dispatch(useItemFromVisibleIndex({ slotIndex: inventoryIndex, baseSlotCount: BASE_INVENTORY_SLOTS }));
               return;
             }

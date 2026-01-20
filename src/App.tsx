@@ -4,10 +4,12 @@ import EntryScreen from "./ui/EntryScreen";
 import GameScreen from "./ui/GameScreen";
 import { selectUi } from "./state/uiSlice";
 import { useRarityTheme } from "./hooks/ui/useRarityTheme";
+import { useGameScale } from "./hooks/ui/useGameScale";
 
 export default function App() {
   const ui = useAppSelector(selectUi);
   useRarityTheme();
+  useGameScale();
 
   useEffect(() => {
     const handleContextMenu = (event: MouseEvent) => {

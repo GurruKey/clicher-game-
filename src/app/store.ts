@@ -36,6 +36,7 @@ import { lootReducer, selectLocationDrops, setLocationDrops } from "../state/loo
 import { settingsReducer, hydrateKeybinds, selectKeybinds } from "../state/settingsSlice";
 import { uiReducer, toggleInventory, toggleMap, resetUi, selectUi } from "../state/uiSlice";
 import { workReducer } from "../state/workSlice";
+import combatReducer from "../state/combatSlice";
 import {
   lootNoticesReducer,
   addNotice,
@@ -81,7 +82,8 @@ export const store = configureStore({
     settings: settingsReducer,
     ui: uiReducer,
     work: workReducer,
-    lootNotices: lootNoticesReducer
+    lootNotices: lootNoticesReducer,
+    combat: combatReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware)

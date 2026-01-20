@@ -2,14 +2,14 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../app/store";
 import { LOCATIONS } from "../content/locations/index.js";
 import { DEFAULT_LOCATION_ID } from "../content/locations/index.js";
-import { pickLootByChance } from "../systems/loot/loot";
-import { recordLocationDrop } from "./lootSlice";
+import { recordLocationDrop, recordEncounterAction, recordAttemptAction, markAsKnown } from "./lootSlice";
 import { consume } from "./resourcesSlice";
 import { placeItemInCurrentContainer } from "./inventorySlice";
 import { CURRENCIES } from "../content/currencies/index.js";
 import { addNotice } from "./lootNoticesSlice";
 import { selectLocationId } from "./playerSlice";
 import { selectAbilityToggledById } from "./playerSlice";
+import { spawnMob } from "./combatThunks";
 import { ABILITIES } from "../content/abilities/index.js";
 import { getActiveAuraModifiers } from "../systems/abilities/auras";
 
@@ -41,6 +41,7 @@ export const startWorkAtLocation = createAsyncThunk<
   if (current < resourceCost) return false;
 
   thunkApi.dispatch(consume({ id: resourceId, amount: resourceCost }));
+  thunkApi.dispatch(recordAttemptAction({ locationId: id }));
   return true;
 });
 
@@ -54,30 +55,56 @@ export const finishWorkAtLocation = createAsyncThunk<
   const location = (LOCATIONS as Record<string, any>)[id];
   if (!location) return;
 
-  const lootId = pickLootByChance(location.lootTable, roll ?? Math.random() * 100);
-  if (!lootId) return;
+  // 1. Check for Mob Encounter
+  const encounterChance = Number(location.encounterChance ?? 0);
+  const encounterRoll = Math.random() * 100;
+  
+  // Specific logic for testing_grounds hardcoded spawn (or use config if available)
+  // We prefer using the config 'encounterChance'
+  if (encounterRoll < encounterChance || (id === "testing_grounds" && encounterRoll < 30)) {
+    // Determine which mob to spawn. For now, hardcoded rat for testing_grounds
+    // In future, pick from location.mobs table
+    const mobId = "rat"; 
+    
+    thunkApi.dispatch(recordEncounterAction({ locationId: id, mobId }));
+    thunkApi.dispatch(spawnMob(mobId));
+    return; // STOP: No loot if encounter happened
+  }
 
-  const maxStackRaw = (CURRENCIES as Record<string, { maxStack?: unknown }>)[lootId]?.maxStack;
-  const maxStack = Number(maxStackRaw);
-  thunkApi.dispatch(
-    placeItemInCurrentContainer({
-      itemId: lootId,
-      amount: 1,
-      maxStack: Number.isFinite(maxStack) && maxStack > 0 ? maxStack : 1
-    })
-  );
+  // 2. Roll for Location Loot (Independent Rolls)
+  if (!location.lootTable) return;
 
-  const loot = (CURRENCIES as Record<string, any>)[lootId];
-  thunkApi.dispatch(
-    addNotice({
-      name: loot?.name ?? lootId,
-      icon: loot?.icon,
-      rarity: loot?.rarity ?? "common",
-      label: "Found"
-    })
-  );
+  for (const item of location.lootTable) {
+    const itemRoll = Math.random() * 100;
+    if (itemRoll <= item.chance) {
+      const lootId = item.id;
+      const maxStackRaw = (CURRENCIES as Record<string, { maxStack?: unknown }>)[lootId]?.maxStack;
+      const maxStack = Number(maxStackRaw);
+      
+      thunkApi.dispatch(
+        placeItemInCurrentContainer({
+          itemId: lootId,
+          amount: 1,
+          maxStack: Number.isFinite(maxStack) && maxStack > 0 ? maxStack : 1
+        })
+      );
 
-  thunkApi.dispatch(recordLocationDrop({ locationId: id, itemId: lootId }));
+      // Auto-pickup => Mark as known immediately
+      thunkApi.dispatch(markAsKnown(lootId));
+
+      const lootMeta = (CURRENCIES as Record<string, any>)[lootId];
+      thunkApi.dispatch(
+        addNotice({
+          name: lootMeta?.name ?? lootId,
+          icon: lootMeta?.icon,
+          rarity: lootMeta?.rarity ?? "common",
+          label: "Found"
+        })
+      );
+
+      thunkApi.dispatch(recordLocationDrop({ locationId: id, itemId: lootId, source: "location" }));
+    }
+  }
 });
 
 export const performLootAtLocation = createAsyncThunk<

@@ -17,11 +17,13 @@ type UiState = {
   isFameOpen: boolean;
   isCharacterOpen: boolean;
   gearLayer: "outer" | "inner";
+  skillError: { barId: number; index: number; timestamp: number } | null;
+  skillPress: { barId: number; index: number; timestamp: number } | null;
 };
 
 const initialState: UiState = {
   isInGame: false,
-    isInventoryOpen: false,
+  isInventoryOpen: false,
   isSettingsOpen: false,
   isKeybindsOpen: false,
   isMapOpen: false,
@@ -34,7 +36,9 @@ const initialState: UiState = {
   isReputationOpen: false,
   isFameOpen: false,
   isCharacterOpen: false,
-  gearLayer: "outer"
+  gearLayer: "outer",
+  skillError: null,
+  skillPress: null
 };
 
 const closeAllDialogs = (state: UiState) => {
@@ -155,6 +159,18 @@ const uiSlice = createSlice({
       state.isInventoryOpen = true;
       closeAllDialogs(state);
       state.gearLayer = "outer";
+    },
+    triggerSkillError(state, action: PayloadAction<{ barId: number; index: number }>) {
+      state.skillError = {
+        ...action.payload,
+        timestamp: Date.now()
+      };
+    },
+    triggerSkillPress(state, action: PayloadAction<{ barId: number; index: number }>) {
+      state.skillPress = {
+        ...action.payload,
+        timestamp: Date.now()
+      };
     }
   }
 });
@@ -186,7 +202,9 @@ export const {
   toggleSpells,
   toggleGearLayer,
   toggleInventory,
-  toggleMap
+  toggleMap,
+  triggerSkillError,
+  triggerSkillPress
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 

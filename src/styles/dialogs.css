@@ -1,6 +1,6 @@
 /* context-menu.css */
 .context-menu {
-  position: fixed;
+  position: absolute;
   z-index: 100;
   min-width: 160px;
   padding: 8px;
@@ -28,7 +28,7 @@
 
 /* dialog-base.css */
 .dialog-backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 30;
   background: rgba(4, 3, 2, 0.7);
@@ -36,6 +36,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
+  pointer-events: auto;
 }
 
 .dialog-backdrop--location {

@@ -9,6 +9,7 @@ import {
   equipFromVisibleIndexToSlot
 } from "../../../state/inventorySlice";
 import { setSkillSlot, setSkillSlot2 } from "../../../state/playerSlice";
+import { takeMobLootItem } from "../../../state/combatThunks";
 import type { DragCursor, DragHotspot, DragState, StartDragFn, StartDragMeta } from "../types";
 
 type InventorySnapshot = {
@@ -113,6 +114,11 @@ export function useGameDragAndDrop(args: {
       }
 
       if (target.kind === "bag") {
+        if ((drag as any).source === "mobLoot") {
+          dispatch(takeMobLootItem((drag as any).mobLootId));
+          resetDrag();
+          return;
+        }
         if (drag.source === "inventory") {
           if (drag.index !== target.index) {
             dispatch(

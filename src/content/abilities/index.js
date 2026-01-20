@@ -8,6 +8,8 @@ import { STAMINA_RESTORE_ABILITY } from "./stamina_restore.js";
 import { STAMINA_AURA_ABILITY } from "./stamina_aura.js";
 import { MANA_REGEN_BUFF_ABILITY } from "./mana_regen_buff.js";
 import { STAMINA_HEALTH_BUFF_ABILITY, STAMINA_BUFF_EFFECT, HEALTH_DEBUFF_EFFECT } from "./stamina_health_buff.js";
+import { BASIC_ATTACK } from "./player/basic_attack.js";
+import { RAT_ATTACK } from "./mobs/rat_attack.js";
 
 export const ABILITIES = [
   COLLECTING_ABILITY,
@@ -21,7 +23,9 @@ export const ABILITIES = [
   MANA_REGEN_BUFF_ABILITY,
   STAMINA_HEALTH_BUFF_ABILITY,
   STAMINA_BUFF_EFFECT,
-  HEALTH_DEBUFF_EFFECT
+  HEALTH_DEBUFF_EFFECT,
+  BASIC_ATTACK,
+  RAT_ATTACK
 ];
 
 export const getAbilityById = (id) => {

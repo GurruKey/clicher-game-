@@ -9,5 +9,6 @@ export const TESTING_GROUNDS = {
   workDurationMs: 5000,
   requiredResourceId: "max_stamina",
   resourceCost: 10.0,
+  encounterChance: 30.0, // 30% chance to encounter a mob
   lootTable: TESTING_GROUNDS_LOOT
 };
