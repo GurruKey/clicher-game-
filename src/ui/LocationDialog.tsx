@@ -194,52 +194,49 @@ export default function LocationDialog() {
 
       {mobStats.length > 0 && (
         <>
-          <div className="location-dialog__section-title" style={{ marginTop: "1.5rem" }}>Local Mobs</div>
+          <div className="location-dialog__section-title location-dialog__section-title--spaced">Local Mobs</div>
           {mobStats.map((mob: any) => (
-            <div key={mob.id} className="location-dialog__mob-section" style={{ marginBottom: "0.5rem" }}>
-              <button 
-                className="location-dialog__row" 
-                style={{ 
-                  width: "100%", 
-                  background: "rgba(255,255,255,0.05)", 
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "4px",
-                  padding: "8px",
-                  cursor: "pointer",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
-                }}
+            <div key={mob.id} className="location-dialog__mob-section">
+              <button
+                className="location-dialog__mob-toggle"
                 onClick={() => setExpandedMobId(expandedMobId === mob.id ? null : mob.id)}
               >
-                 <span className="location-dialog__name" style={{ fontWeight: "bold" }}>{mob.name}</span>
-                 <span className="location-dialog__rate" style={{ fontSize: "0.8rem", color: "var(--accent-bright)" }}>
-                    ~{mob.appearanceRate.toFixed(1)}% appearance
-                 </span>
+                <span className="location-dialog__name location-dialog__mob-name">{mob.name}</span>
+                <span className="location-dialog__rate location-dialog__mob-rate">
+                  ~{mob.appearanceRate.toFixed(1)}% appearance
+                </span>
               </button>
               
               {expandedMobId === mob.id && (
-                <div className="location-dialog__list" style={{ paddingLeft: "10px", marginTop: "5px", background: "rgba(0,0,0,0.2)", borderRadius: "0 0 4px 4px" }}>
+                <div className="location-dialog__list location-dialog__mob-loot">
                   {mob.loot.length > 0 ? (
                     mob.loot.map((item: any) => (
-                      <div key={item.id} className="location-dialog__row" style={{ padding: "4px 8px" }}>
+                      <div key={item.id} className="location-dialog__row location-dialog__row--compact">
                         <div className="location-dialog__left">
                           {item.icon ? (
-                            <img src={item.icon} alt="" draggable={false} className="location-dialog__icon" style={{ width: "16px", height: "16px" }} />
+                            <img
+                              src={item.icon}
+                              alt=""
+                              draggable={false}
+                              className="location-dialog__icon location-dialog__icon--small"
+                            />
                           ) : (
-                            <span className="location-dialog__icon" style={{ width: "16px" }} />
+                            <span className="location-dialog__icon location-dialog__icon--placeholder" />
                           )}
-                          <span className="location-dialog__name" data-rarity={item.rarity} style={{ fontSize: "0.9rem" }}>
+                          <span
+                            className="location-dialog__name location-dialog__name--compact"
+                            data-rarity={item.rarity}
+                          >
                             {item.name}
                           </span>
                         </div>
-                        <span className="location-dialog__rate" style={{ fontSize: "0.8rem" }}>
+                        <span className="location-dialog__rate location-dialog__rate--compact">
                           {item.rate.toFixed(1)}%
                         </span>
                       </div>
                     ))
                   ) : (
-                    <div style={{ padding: "8px", fontSize: "0.8rem", opacity: 0.5 }}>No loot discovered yet</div>
+                    <div className="location-dialog__mob-empty">No loot discovered yet</div>
                   )}
                 </div>
               )}

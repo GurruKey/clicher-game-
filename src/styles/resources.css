@@ -5,8 +5,9 @@
 }
 
 .stamina-bar {
-  height: 22px;
-  width: 286px;
+  height: var(--resource-bar-height);
+  width: var(--resource-bar-width);
+  height: var(--resource-bar-height-local, var(--resource-bar-height));
   border-radius: 2px;
   border: 1px solid rgba(247, 242, 230, 0.2);
   background: rgba(0, 0, 0, 0.9);
@@ -28,6 +29,7 @@
   height: 100%;
   border-radius: 0;
   transition: width 0.3s ease;
+  background-color: var(--resource-fill, #4caf50);
   
   /* Simple depth without blur */
   background-image: linear-gradient(
@@ -44,7 +46,7 @@
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 700;
-  /* Fixed color or set via style */
+  color: var(--resource-text, #ffffff);
   letter-spacing: 0.02em;
 }
 

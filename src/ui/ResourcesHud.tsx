@@ -30,18 +30,18 @@ export default function ResourcesHud() {
             <div
               className="stamina-bar"
               style={{
-                width: 286,
-                height: barHeight
+                ["--resource-bar-height-local" as any]: `${barHeight}px`,
+                ["--resource-fill" as any]: res.color ?? "#4caf50",
+                ["--resource-text" as any]: res.textColor ?? "#ffffff"
               }}
             >
               <div
                 className="stamina-bar__fill"
                 style={{
-                  width: `${(ratio * 100).toFixed(1)}%`,
-                  backgroundColor: res.color ?? "#4caf50"
+                  width: `${(ratio * 100).toFixed(1)}%`
                 }}
               />
-              <span className="stamina-bar__text" style={{ color: res.textColor ?? "#ffffff" }}>
+              <span className="stamina-bar__text">
                 {valueLabel}
               </span>
             </div>

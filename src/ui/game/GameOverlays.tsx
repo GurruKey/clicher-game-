@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { createPortal } from "react-dom";
 import BloodlineDialog from "../BloodlineDialog";
 import CharacterPanel from "../CharacterPanel";
 import ContextMenu, { type InventoryContextMenuPayload } from "../ContextMenu";
@@ -54,6 +55,8 @@ export default function GameOverlays(props: {
   onDeleteCancel: () => void;
   onDeleteConfirm: () => void;
 }) {
+  const overlayRoot = typeof document === "undefined" ? null : document.body;
+
   return (
     <>
       {props.ui.isCharacterOpen ? (
@@ -77,29 +80,7 @@ export default function GameOverlays(props: {
       {props.ui.isLocationOpen ? <LocationDialog /> : null}
       {props.ui.isMapOpen ? <MapDialog /> : null}
 
-      {props.drag && props.dragIconSrc && props.dragCursor && props.dragHotspot ? (
-        <div
-          className="drag-preview"
-          style={{
-            position: "fixed",
-            left: props.dragCursor.x - props.dragHotspot.x,
-            top: props.dragCursor.y - props.dragHotspot.y,
-            zIndex: 9999,
-            pointerEvents: "none"
-          }}
-        >
-          <img src={props.dragIconSrc} alt="" draggable={false} />
-        </div>
-      ) : null}
-
       <LootToasts />
-      <ContextMenu
-        contextMenu={props.contextMenu}
-        menuRef={props.menuRef}
-        onClose={props.onCloseContextMenu}
-        onAction={props.onContextMenuAction as any}
-      />
-      <Tooltip tooltip={props.tooltip} />
       <DeleteDialog
         deleteDialog={props.deleteDialog}
         availableCount={props.availableDeleteCount}
@@ -108,6 +89,31 @@ export default function GameOverlays(props: {
         onCancel={props.onDeleteCancel}
         onConfirm={props.onDeleteConfirm}
       />
+      {overlayRoot
+        ? createPortal(
+            <>
+              {props.drag && props.dragIconSrc && props.dragCursor && props.dragHotspot ? (
+                <div
+                  className="drag-preview"
+                  style={{
+                    left: props.dragCursor.x - props.dragHotspot.x,
+                    top: props.dragCursor.y - props.dragHotspot.y
+                  }}
+                >
+                  <img src={props.dragIconSrc} alt="" draggable={false} />
+                </div>
+              ) : null}
+              <ContextMenu
+                contextMenu={props.contextMenu}
+                menuRef={props.menuRef}
+                onClose={props.onCloseContextMenu}
+                onAction={props.onContextMenuAction as any}
+              />
+              <Tooltip tooltip={props.tooltip} />
+            </>,
+            overlayRoot
+          )
+        : null}
     </>
   );
 }

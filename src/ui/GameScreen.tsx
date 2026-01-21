@@ -272,104 +272,112 @@ export default function GameScreen() {
   });
 
   return (
-    <>
-      <GameTopHud
-        avatarMeta={avatarMeta as any}
-        isCharacterOpen={ui.isCharacterOpen}
-        onToggleCharacter={() => dispatch(ui.isCharacterOpen ? closeCharacter() : openCharacter())}
-        onOpenSettings={() => dispatch(openSettings())}
-      />
+    <div className="game-root">
+      <div className="scene-layer">
+        <div className="scene-layer__inner">
+          <ClickArea onStartDrag={startDrag} />
+        </div>
+      </div>
 
-      <ClickArea onStartDrag={startDrag} />
+      <div className="ui-layer">
+        <div className="ui-layer__inner">
+          <GameTopHud
+            avatarMeta={avatarMeta as any}
+            isCharacterOpen={ui.isCharacterOpen}
+            onToggleCharacter={() => dispatch(ui.isCharacterOpen ? closeCharacter() : openCharacter())}
+            onOpenSettings={() => dispatch(openSettings())}
+          />
 
-      <SkillsBar barId={2} drag={drag?.source === "skillSlot" ? drag : null} onStartDrag={startDrag} />
-      <SkillsBar barId={1} drag={drag?.source === "skillSlot" ? drag : null} onStartDrag={startDrag} />
+          <SkillsBar barId={2} drag={drag?.source === "skillSlot" ? drag : null} onStartDrag={startDrag} />
+          <SkillsBar barId={1} drag={drag?.source === "skillSlot" ? drag : null} onStartDrag={startDrag} />
 
-      <GameBottomBar
-        isSpellsOpen={ui.isSpellsOpen}
-        isInventoryOpen={ui.isInventoryOpen}
-        showAbilitiesButton={skillsUnlocked || knownAbilityIds.length > 0}
-        knownAbilityIds={knownAbilityIds}
-        newTypesCount={newTypesCount}
-        newAbilitiesCount={newAbilitiesCount}
-        equippedBagIconSrc={equippedBagUi.iconSrc}
-        equippedBagLabel={equippedBagUi.label}
-        drag={drag}
-        tooltip={tooltip}
-        onStartDrag={startDrag}
-        onTooltipShow={showTooltip}
-        onTooltipMove={moveTooltip}
-        onTooltipHide={hideTooltip}
-        onOpenContextMenu={handleOpenContextMenu}
-        onToggleMap={() => dispatch(toggleMap())}
-        onToggleSpells={() => dispatch(toggleSpells())}
-        onToggleInventory={() => dispatch(toggleInventory())}
-      />
+          <GameBottomBar
+            isSpellsOpen={ui.isSpellsOpen}
+            isInventoryOpen={ui.isInventoryOpen}
+            showAbilitiesButton={skillsUnlocked || knownAbilityIds.length > 0}
+            knownAbilityIds={knownAbilityIds}
+            newTypesCount={newTypesCount}
+            newAbilitiesCount={newAbilitiesCount}
+            equippedBagIconSrc={equippedBagUi.iconSrc}
+            equippedBagLabel={equippedBagUi.label}
+            drag={drag}
+            tooltip={tooltip}
+            onStartDrag={startDrag}
+            onTooltipShow={showTooltip}
+            onTooltipMove={moveTooltip}
+            onTooltipHide={hideTooltip}
+            onOpenContextMenu={handleOpenContextMenu}
+            onToggleMap={() => dispatch(toggleMap())}
+            onToggleSpells={() => dispatch(toggleSpells())}
+            onToggleInventory={() => dispatch(toggleInventory())}
+          />
 
-      <GameOverlays
-        ui={ui}
-        drag={drag}
-        dragCursor={dragCursor}
-        dragIconSrc={dragIconSrc}
-        dragHotspot={dragHotspot}
-        onStartDrag={startDrag}
-        tooltip={tooltip}
-        onTooltipShow={showTooltip}
-        onTooltipMove={moveTooltip}
-        onTooltipHide={hideTooltip}
-        onOpenContextMenu={handleOpenContextMenu}
-        contextMenu={contextMenu}
-        menuRef={menuRef}
-        onCloseContextMenu={closeContextMenu}
-    onContextMenuAction={(payload) => {
-      if ((payload as any).source === "mobLoot") {
-        if ((payload as any).action === "take") {
-          dispatch(takeMobLootItem((payload as any).id));
-        }
-        return;
-      }
-
-      if (payload.source === "bag") {
-            if (payload.action === "equip") {
-              if ((payload as any).equippableSlotId === "bag") {
-                dispatch(equipBagFromVisibleIndex({ dragIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));
-              } else {
-                dispatch(equipFromVisibleIndex({ dragIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));
+          <GameOverlays
+            ui={ui}
+            drag={drag}
+            dragCursor={dragCursor}
+            dragIconSrc={dragIconSrc}
+            dragHotspot={dragHotspot}
+            onStartDrag={startDrag}
+            tooltip={tooltip}
+            onTooltipShow={showTooltip}
+            onTooltipMove={moveTooltip}
+            onTooltipHide={hideTooltip}
+            onOpenContextMenu={handleOpenContextMenu}
+            contextMenu={contextMenu}
+            menuRef={menuRef}
+            onCloseContextMenu={closeContextMenu}
+            onContextMenuAction={(payload) => {
+              if ((payload as any).source === "mobLoot") {
+                if ((payload as any).action === "take") {
+                  dispatch(takeMobLootItem((payload as any).id));
+                }
+                return;
               }
-              return;
-            }
 
-            if (payload.action === "use") {
-              dispatch(useItemFromVisibleIndex({ slotIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));
-              return;
-            }
+              if (payload.source === "bag") {
+                if (payload.action === "equip") {
+                  if ((payload as any).equippableSlotId === "bag") {
+                    dispatch(equipBagFromVisibleIndex({ dragIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));
+                  } else {
+                    dispatch(equipFromVisibleIndex({ dragIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));
+                  }
+                  return;
+                }
 
-            if (payload.action === "delete") {
-              openDeleteDialog(payload as any);
-              return;
-            }
+                if (payload.action === "use") {
+                  dispatch(useItemFromVisibleIndex({ slotIndex: (payload as any).index, baseSlotCount: BASE_INVENTORY_SLOTS }));
+                  return;
+                }
 
-            return;
-          }
+                if (payload.action === "delete") {
+                  openDeleteDialog(payload as any);
+                  return;
+                }
 
-          if (payload.source === "character") {
-            if (payload.action === "unequip") {
-              dispatch(unequipEquippedSlotToInventory({ slotId: (payload as any).slotId }));
-              return;
-            }
-            if (payload.action === "delete") {
-              openDeleteDialog(payload as any);
-              return;
-            }
-          }
-        }}
-        deleteDialog={deleteDialog}
-        availableDeleteCount={availableDeleteCount}
-        onDeleteDialogChange={(value) => setDeleteDialog((prev) => (prev ? { ...prev, value } : prev))}
-        onDeleteAll={fillDeleteAll}
-        onDeleteCancel={closeDeleteDialog}
-        onDeleteConfirm={confirmDelete}
-      />
-    </>
+                return;
+              }
+
+              if (payload.source === "character") {
+                if (payload.action === "unequip") {
+                  dispatch(unequipEquippedSlotToInventory({ slotId: (payload as any).slotId }));
+                  return;
+                }
+                if (payload.action === "delete") {
+                  openDeleteDialog(payload as any);
+                  return;
+                }
+              }
+            }}
+            deleteDialog={deleteDialog}
+            availableDeleteCount={availableDeleteCount}
+            onDeleteDialogChange={(value) => setDeleteDialog((prev) => (prev ? { ...prev, value } : prev))}
+            onDeleteAll={fillDeleteAll}
+            onDeleteCancel={closeDeleteDialog}
+            onDeleteConfirm={confirmDelete}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

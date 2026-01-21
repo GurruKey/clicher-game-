@@ -73,9 +73,7 @@ export default function InventoryPanel(props: {
                 className={`bag-slot bag-slot--empty${isBase ? " bag-slot--base" : ""}`}
                 data-drop-kind="bag"
                 data-drop-index={slotIndex}
-                style={{
-                  boxShadow: canDropEquippedHere ? "0 0 0 2px rgba(255,255,255,0.15) inset" : undefined
-                }}
+                data-can-drop={canDropEquippedHere ? "true" : "false"}
               />
             );
           }
@@ -88,6 +86,7 @@ export default function InventoryPanel(props: {
               data-dragging={isDragging ? "true" : "false"}
               data-drop-kind="bag"
               data-drop-index={slotIndex}
+              data-can-drop={canDropEquippedHere ? "true" : "false"}
               onPointerDown={(event) => {
                 if (event.button !== 0) return;
                 props.onTooltipHide();
@@ -140,9 +139,6 @@ export default function InventoryPanel(props: {
                   usable: Boolean(currency?.effects),
                   deletable: (currency as any)?.deletable !== false
                 });
-              }}
-              style={{
-                outline: canDropEquippedHere ? "2px solid rgba(255,255,255,0.15)" : undefined
               }}
             >
               {item?.icon ? <img className="bag-slot__icon" src={item.icon} alt="" draggable={false} /> : null}

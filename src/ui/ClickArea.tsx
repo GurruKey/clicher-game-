@@ -115,23 +115,20 @@ export default function ClickArea(props: {
   return (
     <div className="click-area-wrap">
       <button
-        className="location-title"
+        className={`location-title${isMoving ? " location-title--disabled" : ""}`}
         type="button"
         onClick={() => !isMoving && dispatch(openLocation(undefined))}
-        style={isMoving ? { cursor: "default" } : undefined}
       >
         {label}
       </button>
 
-      <div className="click-frame" style={{ pointerEvents: "none" }}>
+      <div className="click-frame">
         <div 
-          className="click-area click-area--disabled" 
+          className="click-area click-area--disabled click-area--background" 
           aria-label="Work area" 
           style={{ 
             pointerEvents: "none",
-            backgroundImage: `url(${isMoving ? travelBg : (isCombat ? (combatMob as any)?.bg : (location?.bg ?? ""))})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center"
+            ["--click-area-bg" as any]: `url(${isMoving ? travelBg : (isCombat ? (combatMob as any)?.bg : (location?.bg ?? ""))})`
           }} 
         />
         {isCombat && combatMob && (
@@ -146,69 +143,38 @@ export default function ClickArea(props: {
               combat.lastHitType === "mob" && Date.now() - combat.lastHitAt < 300 ? "mob-attack-jump" : ""
             }`}
             style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-              ["--glow-color" as any]: glowColor
+              ["--loot-glow" as any]: glowColor
             } as any}
             onClick={() => combat.status === "victory" && setIsLootOpen((prev) => !prev)}
           >
             <img 
               src={(combatMob as any).icon} 
               alt="" 
-              style={{
-                width: "200px",
-                height: "auto",
-                imageRendering: "pixelated"
-              }}
+              className="combat-mob__icon"
               draggable={false}
             />
             {combat.lastHitType === "player" && Date.now() - combat.lastHitAt < 200 && (
               <img 
                 src={getAbilityById("basic_attack")?.icon}
                 alt=""
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: "100px",
-                  pointerEvents: "none"
-                }}
+                className="combat-hit-icon"
               />
             )}
             {combat.status === "fighting" && (
-              <div className="mob-hp-bar" style={{
-                width: "100%",
-                height: "10px",
-                background: "rgba(0,0,0,0.5)",
-                border: "1px solid #000",
-                marginTop: "10px",
-                position: "relative"
-              }}>
-                <div style={{
-                  width: `${(combat.currentMobHealth / combat.maxMobHealth) * 100}%`,
-                  height: "100%",
-                  background: "red",
-                  transition: "width 0.2s"
-                }} />
-                <div style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  fontSize: "8px",
-                  color: "white",
-                  textShadow: "1px 1px 1px black"
-                }}>
+              <div
+                className="mob-hp-bar"
+                style={{ ["--mob-hp" as any]: `${(combat.currentMobHealth / combat.maxMobHealth) * 100}%` }}
+              >
+                <div
+                  className="mob-hp-fill"
+                />
+                <div className="mob-hp-text">
                   {Math.ceil(combat.currentMobHealth)} / {combat.maxMobHealth}
                 </div>
               </div>
             )}
             {combat.status === "defeat" && (
-              <div style={{ color: "red", fontSize: "2rem", fontWeight: "bold", textShadow: "2px 2px 4px black" }}>DEFEAT</div>
+              <div className="combat-defeat-text">DEFEAT</div>
             )}
           </div>
         )}
@@ -269,22 +235,6 @@ export default function ClickArea(props: {
             type="button"
             className="cancel-movement-btn"
             onClick={() => dispatch(cancelMovement())}
-            style={{
-              position: "absolute",
-              bottom: "20px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              pointerEvents: "auto",
-              padding: "10px 20px",
-              background: "rgba(0, 0, 0, 0.7)",
-              border: "1px solid var(--accent)",
-              color: "var(--accent-bright)",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontFamily: "var(--font-ui)",
-              fontSize: "1rem",
-              textTransform: "uppercase"
-            }}
           >
             Return
           </button>
@@ -292,24 +242,11 @@ export default function ClickArea(props: {
         {(combat.status === "fighting" || combat.status === "victory") && (
           <button
             type="button"
-            className="cancel-movement-btn"
+            className={[
+              "cancel-movement-btn",
+              combat.status === "victory" ? "cancel-movement-btn--victory" : "cancel-movement-btn--escape"
+            ].join(" ")}
             onClick={() => dispatch(escapeCombat())}
-            style={{
-              position: "absolute",
-              bottom: "20px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              pointerEvents: "auto",
-              padding: "10px 20px",
-              background: "rgba(0, 0, 0, 0.7)",
-              border: combat.status === "victory" ? "1px solid #4f4" : "1px solid #f00",
-              color: combat.status === "victory" ? "#4f4" : "#f88",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontFamily: "var(--font-ui)",
-              fontSize: "1rem",
-              textTransform: "uppercase"
-            }}
           >
             {combat.status === "victory" ? "Continue" : "Escape"}
           </button>
@@ -317,8 +254,8 @@ export default function ClickArea(props: {
       </div>
 
       <div className="click-progress-row" aria-hidden="true">
-        <div className="click-progress">
-          <div className="click-progress__fill" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }} />
+        <div className="click-progress" style={{ ["--click-progress" as any]: `${Math.min(100, Math.max(0, progress * 100))}%` }}>
+          <div className="click-progress__fill" />
         </div>
         <div className="click-progress__time">
           {timeLabel}

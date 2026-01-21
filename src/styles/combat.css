@@ -10,12 +10,62 @@
 }
 
 .combat-mob-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
   z-index: 10;
   pointer-events: none;
 }
 
 .mob-hp-bar {
+  width: 100%;
+  height: var(--mob-hp-height);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #000;
+  margin-top: 10px;
+  position: relative;
   box-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+.mob-hp-fill {
+  height: 100%;
+  background: red;
+  transition: width 0.2s;
+  width: var(--mob-hp, 0%);
+}
+
+.mob-hp-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8px;
+  color: white;
+  text-shadow: 1px 1px 1px black;
+}
+
+.combat-mob__icon {
+  width: var(--mob-size);
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.combat-hit-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--mob-hit-size);
+  pointer-events: none;
+}
+
+.combat-defeat-text {
+  color: red;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px black;
 }
 
 .mob-attack-jump {
@@ -36,13 +86,13 @@
 }
 
 .mob-loot-glow {
-  filter: drop-shadow(0 0 10px var(--glow-color, gold)) drop-shadow(0 0 20px var(--glow-color, gold));
+  filter: drop-shadow(0 0 10px var(--loot-glow, gold)) drop-shadow(0 0 20px var(--loot-glow, gold));
   animation: loot-pulse 2s infinite ease-in-out;
 }
 
 @keyframes loot-pulse {
-  0%, 100% { filter: drop-shadow(0 0 8px var(--glow-color, gold)) drop-shadow(0 0 12px var(--glow-color, gold)); }
-  50% { filter: drop-shadow(0 0 15px var(--glow-color, gold)) drop-shadow(0 0 25px var(--glow-color, gold)); }
+  0%, 100% { filter: drop-shadow(0 0 8px var(--loot-glow, gold)) drop-shadow(0 0 12px var(--loot-glow, gold)); }
+  50% { filter: drop-shadow(0 0 15px var(--loot-glow, gold)) drop-shadow(0 0 25px var(--loot-glow, gold)); }
 }
 
 .mob-loot-overlay {

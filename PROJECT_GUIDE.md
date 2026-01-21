@@ -10,6 +10,7 @@
 - **Static game definitions (content tables):** `src/content/`
 - **Saving/loading (versioned, legacy-safe):** `src/persistence/`
 - **Global store wiring + subscriptions:** `src/app/store.ts`
+- **Gameplay config knobs (non-content constants):** `src/config/`
 - **CSS:** `src/styles/`
 - **Unit tests (Vitest):** `tests/`
 
@@ -18,14 +19,28 @@
 ### `src/app/`
 Redux store + typed hooks.
 
-- `src/app/store.ts` — creates the RTK store, hydrates from persistence, persists on changes, runs resource regen timers, installs global hotkeys.
+- `src/app/store.ts` — creates the RTK store, hydrates from persistence, persists on changes, runs resource regen timers, installs global hotkeys, and drives timed loops (loot notices, auto-repeat abilities, aura drains).
 - `src/app/hooks.ts` — typed `useAppDispatch` / `useAppSelector`.
+
+### `src/`
+App entry points.
+
+- `src/main.tsx` — bootstraps React app + store.
+- `src/App.tsx` — top-level app shell.
+
+### `src/config/`
+Gameplay configuration constants (non-content).
+
+- `src/config/work.ts` — click/work timing config.
+- `src/config/inventory.ts` — inventory UI/logic config values.
 
 ### `src/content/`
 Static data tables (no business logic). If you want to change definitions (labels, base values, unlock lists), it belongs here.
 
 - `src/content/avatars/` — playable avatars (icon/bg + metadata).
 - `src/content/abilities/` — abilities definitions (id/name/icon/timers/flags); `index.js` is the registry.
+- `src/content/abilities/frames/` — visual frames for abilities.
+- `src/content/entities/` — entities definitions (e.g. mobs).
 - `src/content/keybinds.js` — keybind defaults + formatting/normalization helpers.
 - `src/content/stats/` — stat definitions + `display_config.js` (categories for UI).
 - `src/content/resources/` — resource definitions (e.g. `max_stamina` base).
@@ -33,13 +48,15 @@ Static data tables (no business logic). If you want to change definitions (label
 - `src/content/factions_variants/`, `src/content/origins_variants/`, `src/content/race_variants/` — character creation options.
 - `src/content/starter_packs.js` — initial equipment sets.
 - `src/content/characterSlots.js` — equipment slot definitions.
-- `src/content/items/`, `src/content/locations/`, `src/content/perks/`, etc — more content tables.
+- `src/content/bags.js` — bag definitions derived from items.
+- `src/content/items/` — item presets/types/rarities.
+- `src/content/locations/`, `src/content/perks/`, etc — more content tables.
 
 ### `src/systems/`
 Pure functions (no Redux, no React) that implement rules. Prefer adding tests when changing these.
 
 - `src/systems/calc/` — calculation engine used by stats/resources (mirrors legacy logic).
-- `src/systems/inventory/` — inventory + equipment operations (swap, equip, unequip, nested bag checks, normalization).
+- `src/systems/inventory/` — inventory + equipment operations (swap, equip, unequip, nested bag checks, normalization); `equipment/` holds equip/slot resolution helpers.
 - `src/systems/loot/` — loot/drop logic and helpers.
 - `src/systems/resources/` — resource enablement and max calculations.
 - `src/systems/player/` — avatar meta helpers (default perks, sources).
@@ -57,8 +74,11 @@ Redux Toolkit slices + selectors/thunks that coordinate systems.
 - `src/state/workSlice.ts` — current "work" progress (cast/progress bar) used by abilities like Collecting.
 - `src/state/settingsSlice.ts` — keybinds and other settings.
 - `src/state/uiSlice.ts` — which dialogs/panels are open.
-- `src/state/*Selectors.ts` — derived view models for UI (e.g. `resourcesSelectors.ts`).
-- `src/state/*Thunks.ts` — cross-slice actions (e.g. `selectAvatarProfile` in `src/state/gameThunks.ts`).
+- `src/state/combatSlice.ts` — combat state (mob health, loot, status).
+- `src/state/statsDerive.ts` — derived stats calculations.
+- `src/state/resourcesDerive.ts` — derived resource limits/generation calculations.
+- `src/state/*Selectors.ts` — derived view models for UI (e.g. `resourcesSelectors.ts`, `avatarSelectors.ts`).
+- `src/state/*Thunks.ts` — cross-slice actions (e.g. `selectAvatarProfile` in `src/state/gameThunks.ts`, `combatThunks.ts` for combat logic, `inventoryThunks.ts`, `lootThunks.ts`).
 - `src/state/abilitiesThunks.ts` — executes abilities (costs, delays/cooldowns, cast time, auto-repeat wiring).
 
 ### `src/persistence/`
@@ -69,16 +89,27 @@ LocalStorage I/O only (no UI, minimal validation).
 - `src/persistence/avatar.ts` - last selected profile id (`click-avatar-id`).
 - `src/persistence/avatars.ts` - profile list (`click-avatars`).
 - `src/persistence/keybinds.ts` — keybinds storage.
+- `src/persistence/graphics.ts` — graphics settings storage (resolution + mode).
+- `src/persistence/json.ts` — safe JSON parsing helpers.
 
 ### `src/ui/`
 React components. Should be “dumb”: render state, dispatch actions. Avoid putting game rules here.
 
 - `src/ui/GameScreen.tsx` — main in-game screen entrypoint (wires state + handlers, delegates layout to `src/ui/game/*`).
-- `src/ui/game/` — GameScreen composition pieces + local UI hooks (bottom bar, overlays, drag/drop, hotkeys).
+- `src/ui/game/` — GameScreen composition pieces + local UI hooks (bottom bar, overlays, drag/drop, hotkeys, `GameTopHud`).
+- `src/ui/game/hooks/` — GameScreen-specific UI hooks (escape-to-close, drag/drop, gameplay keybinds).
+- `src/ui/game/types.ts` — local UI types for game screen composition.
+- `src/ui/map/` — map visualization components (e.g. `MapParts`).
 - `src/ui/EntryScreen.tsx` - entry flow (profile selection + new profile creation via `+`; a profile is a unique `profileId` that references a base avatar type).
 - `src/ui/InventoryPanel.tsx` / `src/ui/CharacterPanel.tsx` — inventory + equipment UI (DnD + context menus).
 - `src/ui/SkillsBar.tsx` — abilities action bar.
-- Dialogs: `src/ui/StatsDialog.tsx`, `src/ui/PerksDialog.tsx`, `src/ui/BloodlineDialog.tsx`, `src/ui/FameDialog.tsx`, `src/ui/ReputationDialog.tsx`, etc.
+- `src/ui/ResourcesHud.tsx` — top bar resources display.
+- `src/ui/BuffsBar.tsx` — active buffs/auras display.
+- `src/ui/AbilitiesPanel.tsx` — ability selection and management.
+- `src/ui/ModalShell.tsx` — common dialog wrapper.
+- `src/ui/AvatarCircle.tsx` — avatar display component.
+- `src/ui/ClickArea.tsx` — main click interaction area.
+- Dialogs: `src/ui/StatsDialog.tsx`, `src/ui/PerksDialog.tsx`, `src/ui/BloodlineDialog.tsx`, `src/ui/FameDialog.tsx`, `src/ui/ReputationDialog.tsx`, `src/ui/SettingsDialog.tsx`, `src/ui/KeybindsDialog.tsx`, `src/ui/LocationDialog.tsx`, `src/ui/MapDialog.tsx`, `src/ui/DeleteDialog.tsx`.
 - Overlays: `src/ui/Tooltip.tsx`, `src/ui/ContextMenu.tsx`, `src/ui/LootToasts.tsx`.
 
 ### `src/hooks/`
@@ -87,6 +118,8 @@ React hooks for UI infrastructure (not domain state).
 - `src/hooks/menus/useContextMenu.ts` — context menu behavior.
 - `src/hooks/ui/useTooltip.ts` — tooltip positioning/behavior.
 - `src/hooks/ui/useRarityTheme.ts` — CSS theme wiring.
+- `src/hooks/ui/useGameScale.ts` — responsive scaling logic.
+- `src/hooks/ui/use*Badge.ts` — UI badges/counters helpers.
 - `src/hooks/map/*` — map pan/zoom + map context menu.
 - `src/hooks/work/useClickWork.ts` — click/work timer hook used by the click area.
 
@@ -99,14 +132,24 @@ CSS split by feature area.
 - `src/styles/resources.css` — resource HUD bars.
 - `src/styles/overlays.css` — tooltip/toasts/context menu.
 - `src/styles/avatar.css` — avatar circle styling.
+- `src/styles/combat.css` — combat screen/elements styling.
+- `src/styles/buffs.css` — buffs bar styling.
+- `src/styles/animations.css` — global animations.
 - `src/styles/index.css` — style entrypoint.
 
 ## Asset conventions
 
 - `src/assets/ui/` — UI buttons/icons (bag/map/settings/abilities).
 - `src/assets/items/` — item icons (e.g. `hunter_journal.png`).
+- `src/assets/items/books/`, `src/assets/items/special/`, `src/assets/items/New/` — item art subfolders.
 - `src/assets/abilities/` — ability icons.
 - `src/assets/abilities/helpers/` — small overlays for ability UI (e.g. auto-repeat mark).
+- `src/assets/abilities/overlays/` — ability UI overlay art (e.g. rings).
+- `src/assets/avatars/` — avatar portraits + background.
+- `src/assets/locations/` — location/map artwork.
+- `src/assets/locations/loading/` — travel/loading illustrations.
+- `src/assets/mobs/` — mob sprites.
+- `src/assets/fonts/` — custom fonts.
 
 ## Common change recipes
 

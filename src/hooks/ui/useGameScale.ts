@@ -1,44 +1,54 @@
 import { useEffect, useState } from "react";
 
-export function useGameScale() {
+type GraphicsConfig = {
+  mode: "fixed";
+  width: number;
+  height: number;
+};
+
+export function useGameScale(graphics: GraphicsConfig) {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const calculateScale = () => {
-      // Подбираем эталон так, чтобы на 1440р экранах масштаб был около 0.8-0.9
-      const REFERENCE_WIDTH = 1600;
-      const REFERENCE_HEIGHT = 1000;
-
+      const targetWidth = Math.max(320, Number(graphics?.width ?? 1920));
+      const targetHeight = Math.max(200, Number(graphics?.height ?? 1080));
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
 
-      let newScale = Math.min(windowWidth / REFERENCE_WIDTH, windowHeight / REFERENCE_HEIGHT);
+      let newScale = Math.min(windowWidth / targetWidth, windowHeight / targetHeight);
 
-      // Ограничиваем сверху, чтобы не было гигантизма
-      if (newScale > 1) {
+      if (!Number.isFinite(newScale) || newScale <= 0) {
         newScale = 1;
       }
-      
-      // Минимальный порог, чтобы не превратилось в точку
-      if (newScale < 0.5) {
-        newScale = 0.5;
-      }
 
-      // Ограничиваем масштаб, чтобы не было слишком мелко или слишком крупно (опционально)
-      // newScale = Math.max(0.5, Math.min(1.2, newScale));
+      // Avoid becoming too tiny on small viewports.
+      if (newScale < 0.5) newScale = 0.5;
 
       setScale(newScale);
-      document.documentElement.style.setProperty("--game-scale", newScale.toString());
-      
-      // Также фиксим 100vh для Safari
+
+      const root = document.documentElement;
+      root.style.setProperty("--game-width", `${targetWidth}px`);
+      root.style.setProperty("--game-height", `${targetHeight}px`);
+      root.style.setProperty("--game-width-scaled", `${Math.round(targetWidth * newScale)}px`);
+      root.style.setProperty("--game-height-scaled", `${Math.round(targetHeight * newScale)}px`);
+      root.style.setProperty("--scene-width", `${targetWidth}px`);
+      root.style.setProperty("--scene-height", `${targetHeight}px`);
+      root.style.setProperty("--scene-scale", "1");
+      root.style.setProperty("--game-vw", `${targetWidth / 100}px`);
+      root.style.setProperty("--game-vh", `${targetHeight / 100}px`);
+      root.style.setProperty("--frame-scale", newScale.toString());
+      root.style.setProperty("--game-scale", "1");
+
+      // Safari 100vh fix
       const vh = windowHeight * 0.01;
-      document.documentElement.style.setProperty("--vh", `${vh}px`);
+      root.style.setProperty("--vh", `${vh}px`);
     };
 
     calculateScale();
     window.addEventListener("resize", calculateScale);
     return () => window.removeEventListener("resize", calculateScale);
-  }, []);
+  }, [graphics?.height, graphics?.mode, graphics?.width]);
 
   return scale;
 }

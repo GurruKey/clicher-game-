@@ -120,7 +120,7 @@ function CharacterSlot(props: {
           src={data.icon}
           alt=""
           draggable={false}
-          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+          className="character-slot__icon"
         />
       ) : (
         (props.isDragging ? null : <span className="character-slot__label">{props.slot.label}</span>)
@@ -257,7 +257,7 @@ export default function CharacterPanel(props: {
           </div>
         </div>
 
-        <div className="character-stats-actions" style={{ marginTop: 0 }}>
+      <div className="character-stats-actions character-stats-actions--tight">
           <button className="character-stats-more" type="button" onClick={() => dispatch(openPerks())}>
             Perks
           </button>
@@ -301,7 +301,7 @@ export default function CharacterPanel(props: {
 
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }} />
+      <div className="character-panel__footer-actions" />
     </aside>
   );
 }

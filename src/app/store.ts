@@ -33,7 +33,7 @@ import {
 import { resourcesReducer } from "../state/resourcesSlice";
 import { inventoryReducer, selectInventorySnapshot, setInventory } from "../state/inventorySlice";
 import { lootReducer, selectLocationDrops, setLocationDrops } from "../state/lootSlice";
-import { settingsReducer, hydrateKeybinds, selectKeybinds } from "../state/settingsSlice";
+import { settingsReducer, hydrateKeybinds, selectKeybinds, hydrateGraphics, selectGraphics } from "../state/settingsSlice";
 import { uiReducer, toggleInventory, toggleMap, resetUi, selectUi } from "../state/uiSlice";
 import { workReducer } from "../state/workSlice";
 import combatReducer from "../state/combatSlice";
@@ -59,6 +59,7 @@ import { getDefaultPerkIdsForAvatarId } from "../systems/player/avatarMeta";
 import { normalizeInventorySnapshot } from "../systems/inventory/normalizeInventory";
 import { createStarterInventorySnapshot } from "../systems/inventory/createStarterInventory";
 import { loadKeybinds, saveKeybinds } from "../persistence/keybinds";
+import { loadGraphicsSettings, saveGraphicsSettings } from "../persistence/graphics";
 import { DEFAULT_KEYBINDS } from "../content/keybinds";
 import { resetProgress } from "../state/gameThunks";
 import { useAbility } from "../state/abilitiesThunks";
@@ -70,6 +71,7 @@ import { createProfileId, getBaseAvatarIdFromProfileId } from "../systems/player
 const savedProfileId = loadAvatarId();
 const savedProfileIds = loadAvatarIds();
 const savedKeybinds = loadKeybinds();
+const savedGraphics = loadGraphicsSettings();
 
 const listenerMiddleware = createListenerMiddleware();
 
@@ -101,6 +103,9 @@ let lastPersistedSignature = "";
 // Hydrate from persistence (legacy-safe) after store creation, to avoid tight typing constraints
 if (savedKeybinds) {
   store.dispatch(hydrateKeybinds(savedKeybinds));
+}
+if (savedGraphics) {
+  store.dispatch(hydrateGraphics(savedGraphics));
 }
 
 const hydratedProfileIds = Array.isArray(savedProfileIds) ? savedProfileIds : [];
@@ -243,6 +248,15 @@ store.subscribe(() => {
   if (nextJson === lastKeybindsJson) return;
   lastKeybindsJson = nextJson;
   saveKeybinds(next);
+});
+
+let lastGraphicsJson = JSON.stringify(selectGraphics(store.getState()));
+store.subscribe(() => {
+  const next = selectGraphics(store.getState());
+  const nextJson = JSON.stringify(next);
+  if (nextJson === lastGraphicsJson) return;
+  lastGraphicsJson = nextJson;
+  saveGraphicsSettings({ mode: next.mode, width: next.width, height: next.height });
 });
 
 type RegenConfig = { intervalMs: number; timerId: ReturnType<typeof setInterval> };
@@ -412,6 +426,7 @@ if (typeof window !== "undefined") {
     const resetCode = keybinds.resetProgress ?? DEFAULT_KEYBINDS.resetProgress;
     const openMapCode = keybinds.openMap ?? DEFAULT_KEYBINDS.openMap;
     const toggleBagCode = keybinds.toggleBag ?? DEFAULT_KEYBINDS.toggleBag;
+    const toggleFullscreenCode = keybinds.toggleFullscreen ?? DEFAULT_KEYBINDS.toggleFullscreen;
 
     if (event.code === resetCode) {
       event.preventDefault();
@@ -430,6 +445,20 @@ if (typeof window !== "undefined") {
       event.preventDefault();
       if (ui.isSettingsOpen || ui.isKeybindsOpen || ui.isStatsOpen || ui.isPerksOpen || ui.isBloodlineOpen || ui.isCharacterOpen || ui.isLocationOpen) return;
       store.dispatch(toggleInventory());
+    }
+
+    if (event.code === toggleFullscreenCode) {
+      event.preventDefault();
+      const doc = document as any;
+      if (doc.fullscreenEnabled === false && !doc.webkitFullscreenEnabled) return;
+      const isFullscreen = Boolean(doc.fullscreenElement || doc.webkitFullscreenElement);
+      if (!isFullscreen) {
+        const request = doc.documentElement?.requestFullscreen || doc.documentElement?.webkitRequestFullscreen;
+        request?.call?.(doc.documentElement)?.catch?.(() => undefined);
+      } else {
+        const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+        exit?.call?.(doc)?.catch?.(() => undefined);
+      }
     }
     });
   }

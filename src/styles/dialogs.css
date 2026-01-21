@@ -7,7 +7,7 @@
   border-radius: 12px;
   background: #15120f;
   border: 1px solid var(--outline);
-  box-shadow: 0 18px 40px -28px rgba(5, 4, 3, 0.7);
+  box-shadow: var(--panel-shadow);
 }
 
 .context-menu button {
@@ -43,13 +43,19 @@
   z-index: 36;
 }
 
+.dialog-backdrop--settings {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+}
+
 .dialog {
-  width: min(360px, 90vw);
+  width: 360px;
   background: #15120f;
   border-radius: var(--radius);
   border: 1px solid var(--outline);
   padding: 20px;
-  box-shadow: 0 24px 60px -35px rgba(5, 4, 3, 0.7);
+  box-shadow: var(--shadow-soft);
 }
 
 .dialog h3 {
@@ -124,10 +130,34 @@
 
 /* settings-dialog.css */
 .settings-dialog {
-  width: min(840px, 94vw);
+  width: 840px;
   min-height: 420px;
   display: flex;
   flex-direction: column;
+}
+
+.settings-dialog__tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.settings-dialog__tab {
+  border: 1px solid rgba(247, 242, 230, 0.18);
+  border-radius: 12px;
+  padding: 8px 16px;
+  background: rgba(20, 16, 12, 0.9);
+  color: var(--accent-bright);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 10px rgba(202, 164, 74, 0.2),
+    var(--panel-shadow);
+}
+
+.settings-dialog__tab--active {
+  border-color: rgba(245, 211, 107, 0.7);
+  background: rgba(28, 22, 16, 0.95);
+  color: #f8e1a0;
 }
 
 .settings-dialog__body {
@@ -143,6 +173,135 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
+}
+
+.settings-dialog__panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-dialog__button {
+  border: 1px solid rgba(247, 242, 230, 0.18);
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: rgba(20, 16, 12, 0.9);
+  color: var(--accent-bright);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 10px rgba(202, 164, 74, 0.2),
+    var(--panel-shadow);
+  text-align: left;
+}
+
+.settings-dialog__button:hover {
+  border-color: rgba(245, 211, 107, 0.7);
+  background: rgba(28, 22, 16, 0.95);
+}
+
+.settings-graphics__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid rgba(247, 242, 230, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(12, 10, 8, 0.85);
+}
+
+.settings-graphics__label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.settings-graphics__control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-graphics__dropdown {
+  position: relative;
+}
+
+.settings-graphics__trigger {
+  border: 1px solid rgba(247, 242, 230, 0.18);
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: rgba(20, 16, 12, 0.9);
+  color: var(--accent-bright);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  justify-content: space-between;
+}
+
+.settings-graphics__trigger:hover {
+  border-color: rgba(245, 211, 107, 0.7);
+  background: rgba(28, 22, 16, 0.95);
+}
+
+.settings-graphics__caret {
+  color: var(--muted);
+}
+
+.settings-graphics__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 40;
+  min-width: 260px;
+  max-height: 280px;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(247, 242, 230, 0.18);
+  background: rgba(12, 10, 8, 0.98);
+  box-shadow: var(--panel-shadow);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-graphics__option {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.settings-graphics__option:hover {
+  background: rgba(202, 164, 74, 0.12);
+}
+
+.settings-graphics__option--selected {
+  background: rgba(245, 211, 107, 0.12);
+  border: 1px solid rgba(245, 211, 107, 0.35);
+}
+
+.settings-graphics__option--recommended .settings-graphics__badge {
+  color: var(--accent-bright);
+}
+
+.settings-graphics__badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
 }
 
 .settings-dialog__keybinds,
@@ -167,7 +326,7 @@
 
 /* keybinds-dialog.css */
 .keybinds-dialog {
-  width: min(920px, 95vw);
+  width: 920px;
   min-height: 640px;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -234,7 +393,7 @@
 
 /* stats-dialog.css */
 .stats-dialog {
-  width: min(680px, 94vw);
+  width: 680px;
 }
 
 .stats-dialog__body {
@@ -326,6 +485,10 @@
   letter-spacing: 0.05em;
 }
 
+.location-dialog__section-title--spaced {
+  margin-top: 1.5rem;
+}
+
 .location-dialog__travel-options {
   margin-top: 20px;
   padding-top: 16px;
@@ -400,6 +563,65 @@
   color: var(--muted);
 }
 
+.location-dialog__mob-section {
+  margin-bottom: 0.5rem;
+}
+
+.location-dialog__mob-toggle {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.location-dialog__mob-name {
+  font-weight: bold;
+}
+
+.location-dialog__mob-rate {
+  font-size: 0.8rem;
+  color: var(--accent-bright);
+}
+
+.location-dialog__mob-loot {
+  padding-left: 10px;
+  margin-top: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 4px 4px;
+}
+
+.location-dialog__row--compact {
+  padding: 4px 8px;
+}
+
+.location-dialog__icon--small {
+  width: 16px;
+  height: 16px;
+}
+
+.location-dialog__icon--placeholder {
+  width: 16px;
+}
+
+.location-dialog__name--compact {
+  font-size: 0.9rem;
+}
+
+.location-dialog__rate--compact {
+  font-size: 0.8rem;
+}
+
+.location-dialog__mob-empty {
+  padding: 8px;
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+
 .location-dialog__status-text {
   font-family: var(--font-ui);
   font-size: 1.1rem;
@@ -453,7 +675,7 @@
   width: 20px;
   height: 20px;
   object-fit: contain;
-  filter: drop-shadow(0 0 6px rgba(202, 164, 74, 0.35));
+  filter: var(--icon-glow);
 }
 
 .location-dialog__name {

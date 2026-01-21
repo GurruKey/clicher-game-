@@ -63,28 +63,17 @@ export default function AvatarCircle(props: {
           src={bg}
           alt=""
           draggable="false"
-          className="avatar-circle__canvas"
+          className="avatar-circle__canvas avatar-circle__layer avatar-circle__bg"
           style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
             transform: `translate(calc(${bgMove.x}px), calc(${bgMove.y}px)) scale(${bgScale})`,
-            opacity: 0.7
           }}
         />
         <img
           src={icon}
           alt=""
           draggable="false"
-          className="avatar-circle__canvas"
+          className="avatar-circle__canvas avatar-circle__layer avatar-circle__icon"
           style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
             transform: `translate(calc(${iconMove.x}px), calc(${iconMove.y}px)) scale(${iconScale})`
           }}
         />

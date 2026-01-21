@@ -15,21 +15,9 @@ export default function GameTopHud(props: {
         <img src={settingsIcon} alt="" draggable={false} />
       </button>
 
-      <div
-        style={{
-          position: "absolute",
-          top: 16,
-          left: 16,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: 2,
-          zIndex: 100,
-          pointerEvents: "none"
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", gap: 2 }}>
-          <div style={{ pointerEvents: "auto" }}>
+      <div className="game-top-hud">
+        <div className="game-top-hud__row">
+          <div className="game-top-hud__avatar">
             <AvatarCircle
               as="button"
               className="avatar-circle--hud"
@@ -45,15 +33,7 @@ export default function GameTopHud(props: {
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 6,
-              pointerEvents: "auto",
-              paddingTop: 0
-            }}
-          >
+          <div className="game-top-hud__resources">
             <ResourcesHud />
           </div>
         </div>

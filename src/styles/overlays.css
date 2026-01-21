@@ -10,7 +10,7 @@
   font-size: 0.85rem;
   font-family: var(--font-ui);
   pointer-events: none;
-  box-shadow: 0 10px 24px -18px rgba(202, 164, 74, 0.7);
+  box-shadow: var(--tooltip-shadow);
   white-space: nowrap;
 }
 
@@ -40,7 +40,8 @@
 }
 
 .map-dialog {
-  width: min(1125px, 92vw);
+  width: 1125px;
+  max-width: 100%;
   padding: 18px;
 }
 
@@ -55,7 +56,7 @@
     linear-gradient(140deg, #181410, #0b0907);
   box-shadow:
     inset 0 0 20px rgba(5, 4, 3, 0.5),
-    0 16px 40px -26px rgba(5, 4, 3, 0.7);
+    var(--panel-shadow);
   overflow: hidden;
   cursor: grab;
   touch-action: none;
@@ -108,6 +109,9 @@
   transform: translate(-50%, -50%);
   appearance: none;
   text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1000;
 }
 
 .map-dialog__location:hover {
@@ -148,7 +152,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.12em;
   color: var(--accent-bright);
-  box-shadow: 0 10px 24px -18px rgba(5, 4, 3, 0.6);
+  box-shadow: var(--panel-shadow);
   pointer-events: none;
 }
 
@@ -177,7 +181,7 @@
   justify-content: center;
   cursor: pointer;
   box-shadow:
-    0 12px 24px -18px rgba(5, 4, 3, 0.6),
+    var(--panel-shadow),
     inset 0 0 12px rgba(202, 164, 74, 0.28);
 }
 
@@ -202,7 +206,7 @@
 /* drag-preview.css */
 .drag-preview {
   position: fixed;
-  z-index: 60;
+  z-index: 9999;
   width: 40px;
   height: 40px;
   pointer-events: none;
@@ -213,7 +217,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(202, 164, 74, 0.35));
+  filter: var(--icon-glow-strong);
 }
 
 /* loot-toasts.css */
@@ -237,8 +241,8 @@
   border: 1px solid rgba(247, 242, 230, 0.15);
   background: rgba(16, 14, 12, 0.92);
   box-shadow:
-    0 16px 36px -24px rgba(5, 4, 3, 0.6),
-    0 0 18px rgba(202, 164, 74, 0.12);
+    var(--panel-shadow),
+    var(--panel-glow);
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -254,7 +258,7 @@
   width: 28px;
   height: 28px;
   object-fit: contain;
-  filter: drop-shadow(0 0 6px rgba(202, 164, 74, 0.35));
+  filter: var(--icon-glow);
 }
 
 .loot-toast__text {
@@ -298,10 +302,10 @@
 /* settings-button.css */
 .settings-button {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 52px;
-  height: 52px;
+  top: var(--hud-edge);
+  right: var(--hud-edge);
+  width: var(--control-size);
+  height: var(--control-size);
   padding: 0;
   border-radius: 12px;
   border: 1px solid rgba(247, 242, 230, 0.2);
@@ -309,7 +313,7 @@
   color: var(--accent-bright);
   cursor: pointer;
   box-shadow:
-    0 14px 28px -22px rgba(5, 4, 3, 0.6),
+    var(--panel-shadow),
     inset 0 0 10px rgba(202, 164, 74, 0.15);
   z-index: 10;
   display: inline-flex;

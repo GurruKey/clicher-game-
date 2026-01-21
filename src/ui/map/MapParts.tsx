@@ -80,10 +80,7 @@ export function MapCanvas(props: {
               className="map-dialog__location"
               style={{
                 left: `calc(50% + ${loc.coords.x * 1000}px)`,
-                top: `calc(50% - ${loc.coords.y * 1000}px)`,
-                cursor: "pointer",
-                pointerEvents: "auto",
-                zIndex: 1000 // Очень высокий приоритет
+                top: `calc(50% - ${loc.coords.y * 1000}px)`
               }}
               onPointerDown={(e) => {
                 e.stopPropagation();

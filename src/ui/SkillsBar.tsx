@@ -432,20 +432,27 @@ export default function SkillsBar(props: {
                 />
               ) : null}
               {abilityMeta && castRemainingMs > 0 ? (
-                <span className="skills-bar__cast" aria-hidden="true">
-                  <span className="skills-bar__cast-fill" style={{ height: `${castPct}%` }} />
+                <span
+                  className="skills-bar__cast"
+                  aria-hidden="true"
+                  style={{ ["--skill-cast" as any]: `${castPct}%` }}
+                >
+                  <span className="skills-bar__cast-fill" />
                 </span>
               ) : null}
               {abilityMeta && (delayRemainingMs > 0 || cooldownRemainingMs > 0) ? (
                 <span className="skills-bar__timers" aria-hidden="true">
                   {delayTotalMs > 0 ? (
-                    <span className="skills-bar__timer">
-                      <span className="skills-bar__timer-fill" style={{ width: `${delayPct}%` }} />
+                    <span className="skills-bar__timer" style={{ ["--skill-timer" as any]: `${delayPct}%` }}>
+                      <span className="skills-bar__timer-fill" />
                     </span>
                   ) : null}
                   {cooldownTotalMs > 0 ? (
-                    <span className="skills-bar__timer skills-bar__timer--cooldown">
-                      <span className="skills-bar__timer-fill" style={{ width: `${cooldownPct}%` }} />
+                    <span
+                      className="skills-bar__timer skills-bar__timer--cooldown"
+                      style={{ ["--skill-timer" as any]: `${cooldownPct}%` }}
+                    >
+                      <span className="skills-bar__timer-fill" />
                     </span>
                   ) : null}
                 </span>
